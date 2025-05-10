@@ -5,18 +5,18 @@ from .routes import user_routes
 
 app = FastAPI()
 
-# allowed_origins = [
-#     "http://localhost:8000",
-#     # "202.8.112.251", # public ip
-# ]
+allowed_origins = [
+    "http://localhost:8000",
+    # "202.8.112.251", # public ip
+]
 
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=allowed_origins,
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"],
-# )
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allowed_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(user_routes.router)
 
