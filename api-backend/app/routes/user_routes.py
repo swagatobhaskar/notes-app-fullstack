@@ -45,4 +45,8 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
         data = {"sub": str(user.id)},
         expires_delta=timedelta(minutes=30)
     )
-    return {'access_token': access_token, "token_type": "bearer"}
+    return {
+        'message': 'login successful!',
+        'access_token': access_token,
+        'token_type': 'bearer'
+        }

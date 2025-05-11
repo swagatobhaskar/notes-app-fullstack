@@ -2,11 +2,14 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .routes import user_routes
+from .config import get_settings
+
+settings = get_settings()
 
 app = FastAPI()
 
 allowed_origins = [
-    "http://localhost:8000",
+    "http://localhost:3000",
     # "202.8.112.251", # public ip
 ]
 
