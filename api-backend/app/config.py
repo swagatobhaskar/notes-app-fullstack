@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     env: str = "development"
     algorithm: str
     access_token_expire_minutes: int
+    refresh_token_expire_hours: int
 
     class Config:
         env_file = ".env"

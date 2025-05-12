@@ -137,4 +137,7 @@ def update_profile(
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail="Failed to update user information")
-    
+
+@router.get("/refresh")
+def refresh_token(request: Request):
+    pass
