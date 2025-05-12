@@ -36,10 +36,13 @@ def register(new_user: user_schema.UserCreate, db: Session = Depends(get_db)):
         db.refresh(db_user)
         # Create JWT
         access_token = jwt_config.create_access_token(
-                data = {"sub": str(db_user.id)},
-                expires_delta = timedelta(minutes=settings.access_token_expire_minutes)
+            data = {"sub": str(db_user.id)},
+            expires_delta = timedelta(minutes=settings.access_token_expire_minutes)
             )
-            
+        refresh_token = jwt_config.create_refresh_token(
+            data = {"sub": str(db_user.id)},
+            expires_delta = timedelta(minutes=settings.refresh_token_expire_days)
+        )
     except (JWTError, SQLAlchemyError, Exception) as e:
         # Delete created user or undo any changes if JWT creation fails
         db.rollback()
@@ -49,7 +52,8 @@ def register(new_user: user_schema.UserCreate, db: Session = Depends(get_db)):
         'message': "New user created successfully!",
         'user': db_user,
         'token_type': 'bearer',
-        'access_token': access_token
+        'access_token': access_token,
+        'refresh_token': refresh_token
         }
 
 
@@ -65,12 +69,17 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
             data = {"sub": str(user.id)},
             expires_delta = timedelta(minutes=settings.access_token_expire_minutes)
         )
+        refresh_token = jwt_config.create_refresh_token(
+            data = {"sub": str(user.id)},
+            expires_delta = timedelta(minutes=settings.refresh_token_expire_days)
+        )
     except (JWTError, Exception) as e:
         raise HTTPException(status_code=500, detail="Login failed, Please try again!")
 
     return {
         'message': 'login successful!',
         'access_token': access_token,
+        'refresh_token': refresh_token,
         'token_type': 'bearer'
         }
 

@@ -9,10 +9,6 @@ from .config import get_settings
 
 settings = get_settings()
 
-SECRET_KEY = settings.secret_key
-ALGORITHM = settings.algorithm
-ACCESS_TOKEN_EXPIRE_MINUTES = settings.access_token_expire_minutes
-
 def get_db():
     db = database.SessionLocal()
     try:
@@ -24,16 +20,16 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
         user_id: str = payload.get("sub")
         if user_id is None:
-            raise HTTPException(status_code=401, detail="Invalid Token!")
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Token!")
     except JWTError:
-        raise HTTPException(status_code=401, detail="Could not validate token!")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate token!")
     
     user = db.query(User).filter(User.id == int(user_id)).first()
     if not user:
-        raise HTTPException(status_code=401, detail="User Not Found!")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User Not Found!")
     return user
 
 """

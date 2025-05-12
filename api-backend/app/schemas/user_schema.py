@@ -47,11 +47,13 @@ class UserOut(UserBase):   # Pydantic Model (For Returning Data)
 class UserLogin(BaseModel):
     message: str
     access_token: str
+    refresh_token: str
     token_type: str
 
 class UserOutWithToken(BaseModel):
     message: str
     access_token: str
+    refresh_token: str
     token_type: str
     user: UserOut
     
