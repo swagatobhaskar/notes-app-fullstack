@@ -1,52 +1,140 @@
+import logging
 from typing import Optional, Annotated
 from fastapi import HTTPException, Request, Depends, APIRouter, Query, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from datetime import timedelta
+from jose.exceptions import JWTError
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 
-from app.dependencies import get_db
+from app.dependencies import get_db, get_current_user
 # from .crud import 
 from app.models import User
 from app.schemas import user_schema
 from app.utils import security, jwt_config
+from app.config import get_settings
+
+settings = get_settings()
 
 router = APIRouter(prefix="/api/user", tags=["user"])
 
-@router.post("/register", response_model=user_schema.UserOut)
+@router.post("/register", response_model=user_schema.UserOutWithToken)
 def register(new_user: user_schema.UserCreate, db: Session = Depends(get_db)):
-    db_user = User(
-        email = new_user.email,
-        hashed_password = security.hash_password(new_user.password),
-        fname = new_user.fname,
-        lname = new_user.lname
-    )
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-    return db_user
-    # return {'message': "New user created successfully!"}
+    # Check if user already exists
+    if db.query(User).filter(User.email == new_user.email).first():
+        raise HTTPException(status_code=400, detail="Email already registered!")
 
-# @router.post("/login")#, response_model=user_schema.UserLogin)
-# def login(user_credentials: user_schema.UserLogin, db: Session = Depends(get_db)):
-#     user = db.query(User).filter(User.email == user_credentials.email).first()
-#     if not user or not security.verify_password(user_credentials.password, user.hashed_password):
-#         raise HTTPException(status_code=401, detail="Invalid email or password")
+    try:
+        db_user = User(
+            email = new_user.email,
+            hashed_password = security.hash_password(new_user.password),
+            fname = new_user.fname,
+            lname = new_user.lname
+        )
+        db.add(db_user)
+        db.commit()
+        db.refresh(db_user)
+        # Create JWT
+        access_token = jwt_config.create_access_token(
+                data = {"sub": str(db_user.id)},
+                expires_delta = timedelta(minutes=settings.access_token_expire_minutes)
+            )
+            
+    except (JWTError, SQLAlchemyError, Exception) as e:
+        # Delete created user or undo any changes if JWT creation fails
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Registration failed, please try again!")
 
-#     # generate and return token (if using JWT)
-#     return {"message": "Login successful"}
+    return {
+        'message': "New user created successfully!",
+        'user': db_user,
+        'token_type': 'bearer',
+        'access_token': access_token
+        }
 
-@router.post("/login")
+
+@router.post("/login", response_model=user_schema.UserLogin)
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == form_data.username).first()
+    
     if not user or not security.verify_password(form_data.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid Credentials!")
     
-    access_token = jwt_config.create_access_token(
-        data = {"sub": str(user.id)},
-        expires_delta=timedelta(minutes=30)
-    )
+    try:
+        access_token = jwt_config.create_access_token(
+            data = {"sub": str(user.id)},
+            expires_delta = timedelta(minutes=settings.access_token_expire_minutes)
+        )
+    except (JWTError, Exception) as e:
+        raise HTTPException(status_code=500, detail="Login failed, Please try again!")
+
     return {
         'message': 'login successful!',
         'access_token': access_token,
         'token_type': 'bearer'
         }
+
+@router.get("/profile", response_model=user_schema.UserOut)
+def user_profile(current_user: User = Depends(get_current_user)):
+    return current_user
+
+@router.delete("/delete/", response_model=user_schema.UserDelete)
+def delete_user(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    try:
+        db.delete(current_user)
+        db.commit()
+        return {"message": "Account deleted successfully."}
+    except IntegrityError:
+        # Catch integrity error (e.g., foreign key constraint violation)
+        db.rollback()
+        raise HTTPException(status_code=400, detail="Cannot delete user due to linked records.")
+    except Exception as e:
+        # Catch all other exceptions
+        db.rollback()
+        logging.exception("Failed to delete user")
+        raise HTTPException(status_code=500, detail="Could not delete user, please try again!")
+
+@router.patch("/profile", response_model=user_schema.UpdateProfileResponse)
+def update_profile(
+    updated_user: user_schema.UserPatch,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+    ):
+    try:
+        db_user = db.query(User).filter(User.id == current_user.id).first()
+        if not db_user:
+            raise HTTPException(status_code=404, detail="User not found!")
+        
+        if updated_user.fname:
+            db_user.fname = updated_user.fname
+        if updated_user.lname:
+            db_user.lname = updated_user.lname
+        
+        if updated_user.email:
+            existing_user = db.query(User).filter(User.email == updated_user.email).first()
+            if existing_user:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email is already taken!")
+            db_user.email = updated_user.email
+
+        # Update password if old_password is provided
+        if updated_user.old_password:
+            # Verify old password
+            if not security.verify_password(updated_user.old_password, db_user.hashed_password):
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect old password!")
+
+            # Hash the new password before saving it
+            db_user.hashed_password = security.hash_password(updated_user.new_password)
+
+        db.commit()
+        db.refresh(db_user)
+
+        return {
+            "message": "Profile updated successfully.",
+            "status_code": status.HTTP_200_OK,
+            "user": db_user
+        }
+    
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Failed to update user information")
+    
