@@ -22,14 +22,18 @@ def get_all_notes(db: Session = Depends(get_db), current_user: User = Depends(ge
 
 @router.get("/{note_id}", response_model=note_schema.NoteOut)
 def get_note_by_id(note_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    db_user = db.query(User).filter(User.id == current_user.id).first()
-    if not db_user:
-            raise HTTPException(status_code=404, detail="User not found!")
+    db_note = db.query(Note).filter(Note.id == note_id).first() # , Note.user_id == current_user.id
     
-    db_note = db.query(Note).filter(Note.id == note_id).first()
+    # If the note exists but does not belong to the current user, raise a Forbidden error
+    if db_note and db_note.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not authorized to view this note."
+        )
+    # If the note doesn't exist at all
     if not db_note:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Note not found!")
-    
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Note not found, or Not Authenticated to view content!")
+
     return db_note
 
 @router.patch("/{note_id}", response_model=note_schema.NoteOut)
@@ -54,7 +58,7 @@ def patch_note_by_id(
     return db_note
 
 
-@router.delete("/delete/{note_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{note_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_note_by_id(note_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     note = db.query(Note).filter(Note.id == note_id).first()
 
