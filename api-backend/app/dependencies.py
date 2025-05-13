@@ -23,20 +23,11 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
         user_id: str = payload.get("sub")
         if user_id is None:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Token!")
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Token!", headers={"WWW-Authenticate": "Bearer"})
     except JWTError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate token!")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate token!", headers={"WWW-Authenticate": "Bearer"})
     
     user = db.query(User).filter(User.id == int(user_id)).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User Not Found!")
     return user
-
-"""
-Use JWT Auth in Your Routes
-
-@app.get("/me")
-def read_users_me(current_user: User = Depends(get_current_user)):
-    return current_user
-
-"""
