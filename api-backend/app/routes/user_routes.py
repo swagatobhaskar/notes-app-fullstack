@@ -13,12 +13,12 @@ settings = get_settings()
 
 router = APIRouter(prefix="/api/user", tags=["user"])
 
-@router.get("/profile", response_model=user_schema.UserOut)
+@router.get("/", response_model=user_schema.UserOut)
 def user_profile(current_user: User = Depends(get_current_user)):
     return current_user
 
 
-@router.delete("/delete/", response_model=user_schema.UserDelete)
+@router.delete("/", response_model=user_schema.UserDelete)
 def delete_user(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     try:
         db.delete(current_user)
@@ -35,7 +35,7 @@ def delete_user(current_user: User = Depends(get_current_user), db: Session = De
         raise HTTPException(status_code=500, detail="Could not delete user, please try again!")
 
 
-@router.patch("/profile", response_model=user_schema.UpdateProfileResponse)
+@router.patch("/", response_model=user_schema.UpdateProfileResponse)
 def update_profile(
     updated_user: user_schema.UserPatch,
     db: Session = Depends(get_db),

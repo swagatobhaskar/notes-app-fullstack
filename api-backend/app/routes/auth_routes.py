@@ -1,4 +1,4 @@
-from fastapi import HTTPException, Request, Depends, APIRouter, Query, status
+from fastapi import HTTPException, Request, Response, Depends, APIRouter, Query, status, Cookie
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from datetime import timedelta
@@ -17,7 +17,7 @@ settings = get_settings()
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 @router.post("/register", response_model=user_schema.UserOutWithToken)
-def register(new_user: user_schema.UserCreate, db: Session = Depends(get_db)):
+def register(response: Response, new_user: user_schema.UserCreate, db: Session = Depends(get_db)):
     # Check if user already exists
     if db.query(User).filter(User.email == new_user.email).first():
         raise HTTPException(status_code=400, detail="Email already registered!")
@@ -45,6 +45,25 @@ def register(new_user: user_schema.UserCreate, db: Session = Depends(get_db)):
         # Delete created user or undo any changes if JWT creation fails
         db.rollback()
         raise HTTPException(status_code=500, detail="Registration failed, please try again!")
+    
+    # Send both access and refresh token as cookie
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        secure=True,              # Set to True in production with HTTPS
+        samesite="strict",        # or 'lax', depending on your frontend/backend separation
+        # path="/refresh-token"     # Limit access to only the refresh-token route
+    )
+    
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        httponly=True,
+        secure=True,              # Set to True in production with HTTPS
+        samesite="strict",        # or 'lax', depending on your frontend/backend separation
+        path="/refresh-token"     # Limit access to only the refresh-token route
+    )
 
     return {
         'message': "New user created successfully!",
@@ -56,7 +75,7 @@ def register(new_user: user_schema.UserCreate, db: Session = Depends(get_db)):
 
 
 @router.post("/login", response_model=user_schema.UserLogin)
-def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+def login(response: Response, form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == form_data.username).first()
     
     if not user or not security.verify_password(form_data.password, user.hashed_password):
@@ -74,6 +93,25 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     except (JWTError, Exception) as e:
         raise HTTPException(status_code=500, detail="Login failed, Please try again!")
 
+    # Send both access and refresh token as cookie
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        secure=True,              # Set to True in production with HTTPS
+        samesite="strict",        # or 'lax', depending on your frontend/backend separation
+        # path="/refresh-token"     # Limit access to only the refresh-token route
+    )
+
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        httponly=True,
+        secure=True,              # Set to True in production with HTTPS
+        samesite="strict",        # or 'lax', depending on your frontend/backend separation
+        path="/refresh-token"     # Limit access to only the refresh-token route
+    )
+
     return {
         'message': 'login successful!',
         'access_token': access_token,
@@ -82,9 +120,10 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
         }
 
 
-@router.get("/refresh-token", response_model=user_schema.TokenSchema)
-def refresh_token(request: Request, db: Session = Depends(get_db)):
-    refresh_token_from_cookie = request.cookies.get("refresh")
+@router.post("/refresh-token", response_model=user_schema.TokenSchema)
+def refresh_token(response: Response, request: Request, db: Session = Depends(get_db)):
+    print("COOKIE: ", request.cookies)
+    refresh_token_from_cookie = request.cookies.get("refresh_token")
     if not refresh_token_from_cookie:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh token missing")
     
@@ -100,6 +139,15 @@ def refresh_token(request: Request, db: Session = Depends(get_db)):
         
         access_token = jwt_config.create_access_token(data={"sub": str(user.id)})
         
+        # Send a new access token as cookie
+        response.set_cookie(
+            key="access_token",
+            value=access_token,
+            httponly=True,
+            secure=True,              # Set to True in production with HTTPS
+            samesite="strict",        # or 'lax', depending on your frontend/backend separation
+            # path="/refresh-token"     # Limit access to only the refresh-token route
+        )
         return {"access_token": access_token, "token_type": "bearer"}
     
     except JWTError:
