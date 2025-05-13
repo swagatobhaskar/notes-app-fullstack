@@ -1,91 +1,22 @@
 import logging
-from typing import Optional, Annotated
 from fastapi import HTTPException, Request, Depends, APIRouter, Query, status
-from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from datetime import timedelta
-from jose.exceptions import JWTError
-from sqlalchemy.exc import SQLAlchemyError, IntegrityError
+from sqlalchemy.exc import IntegrityError
 
 from app.dependencies import get_db, get_current_user
-# from .crud import 
 from app.models import User
 from app.schemas import user_schema
-from app.utils import security, jwt_config
+from app.utils import security
 from app.config import get_settings
 
 settings = get_settings()
 
 router = APIRouter(prefix="/api/user", tags=["user"])
 
-@router.post("/register", response_model=user_schema.UserOutWithToken)
-def register(new_user: user_schema.UserCreate, db: Session = Depends(get_db)):
-    # Check if user already exists
-    if db.query(User).filter(User.email == new_user.email).first():
-        raise HTTPException(status_code=400, detail="Email already registered!")
-
-    try:
-        db_user = User(
-            email = new_user.email,
-            hashed_password = security.hash_password(new_user.password),
-            fname = new_user.fname,
-            lname = new_user.lname
-        )
-        db.add(db_user)
-        db.commit()
-        db.refresh(db_user)
-        # Create JWT
-        access_token = jwt_config.create_access_token(
-            data = {"sub": str(db_user.id)},
-            expires_delta = timedelta(minutes=settings.access_token_expire_minutes)
-            )
-        refresh_token = jwt_config.create_refresh_token(
-            data = {"sub": str(db_user.id)},
-            expires_delta = timedelta(minutes=settings.refresh_token_expire_days)
-        )
-    except (JWTError, SQLAlchemyError, Exception) as e:
-        # Delete created user or undo any changes if JWT creation fails
-        db.rollback()
-        raise HTTPException(status_code=500, detail="Registration failed, please try again!")
-
-    return {
-        'message': "New user created successfully!",
-        'user': db_user,
-        'token_type': 'bearer',
-        'access_token': access_token,
-        'refresh_token': refresh_token
-        }
-
-
-@router.post("/login", response_model=user_schema.UserLogin)
-def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.email == form_data.username).first()
-    
-    if not user or not security.verify_password(form_data.password, user.hashed_password):
-        raise HTTPException(status_code=401, detail="Invalid Credentials!")
-    
-    try:
-        access_token = jwt_config.create_access_token(
-            data = {"sub": str(user.id)},
-            expires_delta = timedelta(minutes=settings.access_token_expire_minutes)
-        )
-        refresh_token = jwt_config.create_refresh_token(
-            data = {"sub": str(user.id)},
-            expires_delta = timedelta(minutes=settings.refresh_token_expire_days)
-        )
-    except (JWTError, Exception) as e:
-        raise HTTPException(status_code=500, detail="Login failed, Please try again!")
-
-    return {
-        'message': 'login successful!',
-        'access_token': access_token,
-        'refresh_token': refresh_token,
-        'token_type': 'bearer'
-        }
-
 @router.get("/profile", response_model=user_schema.UserOut)
 def user_profile(current_user: User = Depends(get_current_user)):
     return current_user
+
 
 @router.delete("/delete/", response_model=user_schema.UserDelete)
 def delete_user(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
@@ -102,6 +33,7 @@ def delete_user(current_user: User = Depends(get_current_user), db: Session = De
         db.rollback()
         logging.exception("Failed to delete user")
         raise HTTPException(status_code=500, detail="Could not delete user, please try again!")
+
 
 @router.patch("/profile", response_model=user_schema.UpdateProfileResponse)
 def update_profile(
@@ -146,7 +78,3 @@ def update_profile(
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail="Failed to update user information")
-
-@router.get("/refresh")
-def refresh_token(request: Request):
-    pass
