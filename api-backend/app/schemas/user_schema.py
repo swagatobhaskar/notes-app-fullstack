@@ -83,3 +83,8 @@ class UpdateProfileResponse(BaseModel):
     message: str
     status_code: int
     user: UserOut
+
+class TokenSchema(BaseModel):
+    access_token: str
+    token_type: str
+    
