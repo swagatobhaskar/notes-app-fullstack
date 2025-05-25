@@ -5,12 +5,10 @@ export default function LoginLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className=""
-      >
-        {children}
-      </body>
-    </html>
+    <div
+      className=""
+    >
+      {children}
+    </div>
   );
 }

@@ -1,26 +1,35 @@
 import Image from "next/image";
 
+import AuthButtons from "./ui/home_page/auth_buttons";
+
 export default async function Home() {
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="relative flex flex-col min-h-screen">
+      <Image 
+        src='/hugo-rocha-unsplash.jpg'
+        alt="brainstorm-notes"
+        placeholder="empty"
+        quality={100}
+        fill
+        sizes="100vw"
+        style={{
+          objectFit: 'cover',
+          zIndex: -1
+        }}
+        className="opacity-60 blur-xs hue-rotate-30"
+      />
       <header className="bg-gray-800 text-white p-4 text-center">
         <p>Example App</p>
       </header>
-      <main className="flex-1">
-        <div className="mx-auto w-2/3">
-          <Image 
-            src='/hugo-rocha-unsplash.jpg'
-            alt="brainstorm-notes"
-            placeholder="empty"
-            quality={100}
-            fill
-            sizes="100vw"
-            style={{
-              objectFit: 'cover',
-            }}
-            className="opacity-60 blur-xs"
-          />
+      <main className="flex-1 z-10 p-6 text-black">
+        <div className="mx-auto max-w-3xl bg-blue-300/45 shadow-md rounded-md h-96 flex flex-col items-center justify-center gap-y-4">
+          {/* Your main content here */}
+          <h1 className="text-4xl font-extrabold">Your Online Notes Archive</h1>
+          <p className="text-xl">Single place for all your notes.</p>
+          <div className="">
+            <AuthButtons />
+          </div>
         </div>
       </main>
       <footer className="bg-gray-800 text-white p-4 text-center">
