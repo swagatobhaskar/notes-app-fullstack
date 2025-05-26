@@ -1,6 +1,5 @@
 import Image from "next/image";
-
-import AuthButtons from "./ui/home_page/auth_buttons";
+import Link from "next/link";
 
 export default async function Home() {
 
@@ -27,8 +26,15 @@ export default async function Home() {
           {/* Your main content here */}
           <h1 className="text-4xl font-extrabold">Your Online Notes Archive</h1>
           <p className="text-xl">Single place for all your notes.</p>
-          <div className="">
-            <AuthButtons />
+          <div className="flex flex-row gap-x-2">
+            <Link
+                className="text-white bg-blue-700 px-2.5 py-1.5 rounded-md font-semibold hover:bg-blue-800"
+                href={'/user/login'}>Login
+            </Link>
+            <Link
+                className="text-white bg-blue-700 px-2.5 py-1.5 rounded-md font-semibold hover:bg-blue-800"
+                href={'/user/register'}>Sign up
+            </Link>
           </div>
         </div>
       </main>
