@@ -1,12 +1,16 @@
 'use client';
 
 import { useState } from "react"
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState('');
     
+    const router = useRouter()
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
@@ -29,19 +33,24 @@ export default function Login() {
             }
             // handle successful login here
             console.log("Login Successful!", data);
+            router.push("/");
+            
         } catch (err) {
             setError(err.message);
         }
     }
 
     return (
-        <div id="login-card" className="mx-auto mt-60 w-1/4 shadow-2xl shadow-gray-400 h-fit">
-            <div className="flex flex-col">
-                <form onSubmit={handleSubmit}>
+        <div id="login-card" className="flex items-center justify-center min-h-screen bg-gray-100">
+            <div className="w-full max-w-md bg-white rounded-xl shadow-xl border border-gray-200 p-8 space-y-6">
+                <h2 className="text-2xl font-bold text-center text-gray-800">Log In</h2>
+                <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                        <label htmlFor="email">Email</label>
+                        <label htmlFor="email" className="block text-md font-semibold text-gray-700">Email</label>
                         <input
-                            type="text"
+                            type="email"
+                            id="email"
+                            className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm"
                             placeholder="john.doe@example.com"
                             required
                             value={email}
@@ -49,19 +58,29 @@ export default function Login() {
                         />
                     </div>
                     <div>
-                        <label htmlFor="password">Password</label>
+                        <label htmlFor="password" className="block text-md font-semibold text-gray-700">Password</label>
                         <input
                             type="password"
+                            id="password"
+                            className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 shadow-sm"
                             placeholder="********"
                             required
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         />
                     </div>
-                    <button type="submit">Log In</button>
+                    <button
+                        type="submit"
+                        className="w-full px-4 py-2 font-semibold text-white rounded-md bg-blue-600
+                        hover:bg-blue-700 hover:cursor-pointer transition-colors
+                        ">
+                            Log In
+                    </button>
                 </form>
-                    {error && <p style={{ color: 'red' }}>{error}</p>}
-                    <p>Don't have account? Register Now</p>
+                    {error && <p className="text-sm text-red-600 text-center">{error}</p>}
+                    <p className="text-sm text-center text-gray-600">Don't have account?
+                        <Link href="/user/register" className="text-blue-500 hover:text-blue-600 ml-1 font-bold">Register Now</Link>
+                    </p>
             </div>
         </div>
     );
