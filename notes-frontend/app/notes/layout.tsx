@@ -1,3 +1,5 @@
+import Footer from "../ui/footer";
+import Header from "../ui/header";
 
 export default function NotesLayout({
   children,
@@ -8,15 +10,11 @@ export default function NotesLayout({
     <div
       className="relative flex flex-col min-h-screen"
     >
-      <header className="bg-gray-800 text-white p-4 text-center">
-        <p>Example App</p>
-      </header>
+      <Header />
       <main className="flex flex-1 items-center justify-center bg-gray-100">
         {children}
       </main>
-      <footer className="bg-gray-800 text-white p-4 text-center">
-        <p>Made with FastAPI and Next.js</p>
-      </footer>
+      <Footer />
     </div>
   );
 }

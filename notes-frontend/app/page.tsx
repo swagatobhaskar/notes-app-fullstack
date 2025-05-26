@@ -1,6 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import Header from "./ui/header";
+import Footer from "./ui/footer";
+
 export default async function Home() {
 
   return (
@@ -18,9 +21,9 @@ export default async function Home() {
         }}
         className="opacity-60 blur-xs hue-rotate-30"
       />
-      <header className="bg-gray-800 text-white p-4 text-center">
-        <p>Example App</p>
-      </header>
+
+      <Header />
+      
       <main className="flex-1 z-10 p-6 text-black">
         <div className="mx-auto max-w-3xl bg-blue-300/45 shadow-md rounded-md h-96 flex flex-col items-center justify-center gap-y-4">
           {/* Your main content here */}
@@ -38,9 +41,9 @@ export default async function Home() {
           </div>
         </div>
       </main>
-      <footer className="bg-gray-800 text-white p-4 text-center">
-        <p>Made with FastAPI and Next.js</p>
-      </footer>
+
+      <Footer />
+    
     </div>
   );
 }
