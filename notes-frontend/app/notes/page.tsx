@@ -1,22 +1,70 @@
 "use client"
 
-const dummyNotes = [
-  { id: 1, author: "john doe", title: "Note One", content: "This is the content of note one." },
-  { id: 2, author: "john doe", title: "Note Two", content: "Content for the second note goes here." },
-  { id: 3, author: "john doe", title: "Meeting Notes", content: "Meeting with ABC Corp. discussed Q3 goals." },
-  { id: 4, author: "john doe", title: "Shopping List", content: "Eggs, milk, bread, and orange juice." },
-  { id: 5, author: "john doe", title: "Workout Plan", content: "Monday: Chest & Triceps. Tuesday: Back & Biceps." },
-  { id: 6, author: "john doe", title: "Random Thoughts", content: "Sometimes I wonder if penguins have knees." },
-  { id: 7, author: "john doe", title: "Travel Plans", content: "Visit Tokyo in April, then Kyoto and Osaka." },
-  { id: 8, author: "john doe", title: "Book Ideas", content: "Sci-fi story set in a post-apocalyptic Mars colony." },
-  { id: 9, author: "john doe", title: "Goals 2025", content: "Read 20 books, run a marathon, learn TypeScript." },
-  { id: 10, author: "john doe", title: "Quote of the Day", content: "“The best time to plant a tree was 20 years ago.”" },
-];
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+interface Note {
+  id: number,
+  author: string,
+  title: string,
+  content: string,
+  created_at: string,
+  updated_at: string
+}
 
 export default function Notes() {
-    return (
-        <div className="">
 
-        </div>
-    );
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchNotes() {
+        try {
+            const res = await fetch('http://127.0.0.1:8000/api/note', {
+              method: "GET",
+              credentials: "include",
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            });
+            const result = await res.json();
+            setNotes(result);
+            console.log(result);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    fetchNotes();
+  }, [])
+
+  if (loading) return <p>Loading...</p>;
+  if (notes.length === 0) return <p>No notes found.</p>;
+
+  return (
+    <div className="">
+      {/* {loading ? (
+        <p>Loading...</p>
+      ) : notes.length === 0 ? (
+        <p>No notes...</p>
+      ) : ( */}
+      <ul className="">
+        {notes.map((note: Note) => (
+          <div key={note.id}>
+            <p>{note.id}</p>
+            <p>{note.author}</p>
+            <p>{note.title}</p>
+            <p>{note.content}</p>
+            <p>Created at: {new Date(note.created_at).toLocaleString()}</p>
+            <p>Updated at: {new Date(note.updated_at).toLocaleString()}</p>
+          </div>
+        ))}
+      </ul>
+      {/* )} */}
+    </div>
+  );
 }
