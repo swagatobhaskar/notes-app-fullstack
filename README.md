@@ -8,3 +8,7 @@
 
 "email": "sweet.johnson@lol.idk",
 "password": "12345!SJinAnDrEaS#"
+
+"email": "catalina@lol.idk",
+"password": "kata12345!SJinAnDrEaS#"
+
