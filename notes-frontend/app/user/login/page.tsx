@@ -14,18 +14,22 @@ export default function Login() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
-        const body = {email, password};
         try {
             const response = await fetch("http://127.0.0.1:8000/api/auth/login", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify(body),
+                credentials: "include",
+                body: JSON.stringify({
+                    email: email,
+                    password: password
+                }),
                 }
             )
 
             const data = await response.json();
+            // console.log(data);
 
             if (!response.ok) {
                 // print data.message

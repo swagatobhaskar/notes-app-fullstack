@@ -40,18 +40,20 @@ export default function Register() {
                 headers: {
                     "Content-Type": "application/json"
                 },
+                credentials: "include",
                 body: JSON.stringify(body),
                 }
             )
 
             const data = await response.json();
+            // console.log("DATA:", data);
 
             if (!response.ok) {
                 // print data.message
                 throw new Error("Something went wrong!")
             }
             // handle successful login here
-            console.log("Successfully Registered!", data);
+            console.log("Successfully Registered!");
             router.push("/");
             
         } catch (err) {
@@ -106,6 +108,7 @@ export default function Register() {
                 {error && <p className="text-sm text-red-600 text-center">{error}</p>}
                 <button
                     type="submit"
+                    disabled={!isMatch}
                     className="mt-2 w-full px-4 py-2 font-semibold text-white rounded-md bg-blue-600
                     hover:bg-blue-700 hover:cursor-pointer transition-colors
                     ">
