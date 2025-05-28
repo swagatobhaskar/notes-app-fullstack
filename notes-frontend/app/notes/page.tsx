@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 interface Note {
@@ -15,9 +14,21 @@ interface Note {
 
 export default function Notes() {
 
+  const router = useRouter();
+
   const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const truncateText = (text: string, maxLength: number = 20): string => {
+    return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
+  }
+
+  const showUpdatedAt = (created_at: string, updated_at: string) => {
+    if (updated_at !== created_at) {
+      return <p>Updated at: {new Date(updated_at).toLocaleString()}</p>
+    }
+  } 
 
   useEffect(() => {
     async function fetchNotes() {
@@ -52,18 +63,23 @@ export default function Notes() {
       ) : notes.length === 0 ? (
         <p>No notes...</p>
       ) : ( */}
-      <ul className="">
+      <div className="grid md:grid-cols-4 md:grid-rows-3 gap-4">
         {notes.map((note: Note) => (
-          <div key={note.id}>
-            <p>{note.id}</p>
-            <p>{note.author}</p>
-            <p>{note.title}</p>
-            <p>{note.content}</p>
-            <p>Created at: {new Date(note.created_at).toLocaleString()}</p>
-            <p>Updated at: {new Date(note.updated_at).toLocaleString()}</p>
+          <div
+            key={note.id}
+            className="flex flex-col space-y-4 w-60 h-52 border-gray-200 rounded-md shadow-md shadow-gray-400 p-5 overflow-hidden"
+            onClick={(e:React.MouseEvent) => router.push(`/notes/${note.id}`)}
+          >
+            <p className="font-sans text-2xl flex-2/3 font-semibold">{note.title}</p>
+            <p className="text-sm flex-1/3">{truncateText(note.content)}</p>
+            <div className="text-xs text-gray-500 flex-1/3">
+              <p>Created at: {new Date(note.created_at).toLocaleString()}</p>
+              {/* <p>Updated at: {new Date(note.updated_at).toLocaleString()}</p> */}
+              {showUpdatedAt(note.created_at, note.updated_at)}
+            </div>
           </div>
         ))}
-      </ul>
+      </div>
       {/* )} */}
     </div>
   );

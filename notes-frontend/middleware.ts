@@ -12,5 +12,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/notes', '/notes/:path*', '/user/:path*'], // protect these routes
+  matcher: ['/notes', '/notes/:path*',], // protect these routes
 };
