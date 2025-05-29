@@ -12,7 +12,7 @@ export default async function Home() {
         src='/hugo-rocha-unsplash.jpg'
         alt="brainstorm-notes"
         placeholder="empty"
-        quality={100}
+        quality={75}
         fill
         sizes="100vw"
         style={{
@@ -32,11 +32,11 @@ export default async function Home() {
           <div className="flex flex-row gap-x-2">
             <Link
                 className="text-white bg-blue-700 px-2.5 py-1.5 rounded-md font-semibold hover:bg-blue-800"
-                href={'/user/login'}>Login
+                href={'/login'}>Login
             </Link>
             <Link
                 className="text-white bg-blue-700 px-2.5 py-1.5 rounded-md font-semibold hover:bg-blue-800"
-                href={'/user/register'}>Sign up
+                href={'/register'}>Sign up
             </Link>
           </div>
         </div>
