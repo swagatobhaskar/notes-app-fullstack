@@ -44,7 +44,7 @@ export default function NewNote() {
     // periodically save as draft or to localStorage
 
     return (
-        <div className="">
+        <div className="min-w-[70vw] max-w-[70vw] self-start">
             <form onSubmit={handleNewNoteSubmit}>
                 <div className="">
                     <label htmlFor="title" className="">Title</label>
