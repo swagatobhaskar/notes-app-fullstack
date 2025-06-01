@@ -9,7 +9,7 @@ export default function NotesLayout({
   return (
     <div className="relative flex flex-col min-h-screen">
       <Header />
-      <main className="flex flex-1 items-center justify-center bg-white">
+      <main className="flex flex-1 bg-white items-center justify-center"> 
         {children}
       </main>
       <Footer />

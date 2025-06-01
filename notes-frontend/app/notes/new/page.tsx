@@ -1,5 +1,6 @@
 "use client"
 
+import Tiptap from "@/app/components/Tiptap";
 import { useRouter } from "next/navigation"
 import React, { useState } from "react"
 
@@ -56,14 +57,31 @@ export default function NewNote() {
                         onChange={handleChange}
                     />
                 </div>
-                <textarea id="content" name="content" required value={formData.content} onChange={handleChange} />
-                <button
-                    type="submit"
-                    className="text-white px-3 py-1 rounded-sm bg-blue-400
-                    hover:bg-blue-500 cursor-pointer"
-                >
-                    Save Note
-                </button>
+                {/* <textarea id="content" name="content" required value={formData.content} onChange={handleChange} /> */}
+                <Tiptap value={formData.content} />
+                <div className="">
+                    <button
+                        type="button"
+                        onClick={() => {
+                            const confirmed = window.confirm('Are you sure you want to cancel your changes?');
+                            if (confirmed) {
+                                setFormData({title:'', content:''})
+                                router.push(`/notes/`)
+                            }
+                        }}
+                        className="text-white px-3 py-1 rounded-sm bg-gray-400
+                        hover:bg-gray-500 cursor-pointer"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="submit"
+                        className="text-white px-3 py-1 rounded-sm bg-blue-400
+                        hover:bg-blue-500 cursor-pointer"
+                    >
+                        Save Note
+                    </button>
+                </div>
             </form>
         </div>
     );
