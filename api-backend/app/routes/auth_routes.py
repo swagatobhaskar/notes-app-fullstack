@@ -156,3 +156,4 @@ def refresh_token(response: Response, request: Request, db: Session = Depends(ge
     except JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh token expired or invalid!")
     
+# logout route

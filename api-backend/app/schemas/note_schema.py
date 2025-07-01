@@ -58,3 +58,24 @@ class NoteUpdate(BaseModel):
         if not re.match(r'^[a-zA-Z0-9\s\-_!?.,]+$', v):
             raise ValueError("Title can only contain letters, numbers, spaces, hyphens, and underscores.")
         return v
+
+
+class TagBase(BaseModel):
+    # id: int
+    name: str
+
+class TagCreate(TagBase):
+    pass
+
+class TagOut(TagBase):
+    id: int
+
+    class Config:
+        from_attributes = True
+
+class FolderBase(BaseModel):
+    id: int
+    name: str
+
+class FolderOut(FolderBase):
+    pass
