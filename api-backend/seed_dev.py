@@ -1,7 +1,9 @@
 import os
+import subprocess
+from sqlalchemy.exc import OperationalError
 
 from app.database import SessionLocal
-from app.models import Note, User
+from app.models import Note, User, Tag, Folder
 from app.utils.security import hash_password
 
 ENV = os.getenv("ENV", "development")
@@ -51,14 +53,90 @@ def seed_note(db):
         print("⚠️  notes already exist. Skipping.")
         return
 
+def seed_folder(db):
+    if not db.query(Folder).count() > 0:
+        print("📁 Seeding Folder...")
+
+        folders = [
+            Folder(name='general'),
+            Folder(name='work'),
+            Folder(name='food')
+        ]
+
+        db.add_all(folders)
+        db.commit()
+        print("✅ Seeded Folders.")
+
+    else:
+        print("⚠️ folders already exist. Skipping.")
+        return
+
+def seed_tag(db):
+    if not db.query(Tag).count() > 0:
+        print("🏷️ Seeding Tag...")
+
+        tags = [
+            Tag(name='AI/ML'),
+            Tag(name='freelance'),
+            Tag(name='python'),
+            Tag(name='general')
+        ]
+
+        db.add_all(tags)
+        db.commit()
+        print("✅ Seeded Tags.")
+        
+    else:
+        print("⚠️  tags already exist. Skipping.")
+        return
+
+def seed_note_with_folder_and_tag(db):
+    note = db.query(Note).filter(Note.id == 1).first()
+    if not note:
+        print("❌ Note with id=1 not found.")
+        return
+    
+    general_tag = db.query(Tag).filter(Tag.name == 'general').first()
+    if not general_tag:
+        print("❌ Tag 'general' not found.")
+        return
+    
+    if general_tag not in note.tags:
+        note.tags.append(general_tag)
+
+    general_folder = db.query(Folder).filter(Folder.name == 'general').first()
+    if not general_folder:
+        print("❌ Folder 'general' not found.")
+        return
+    note.folder = general_folder
+
+    db.commit()
+    print("✅ Seeded Note with Folder and Tag")
+
 def main():
     if ENV != "development":
         print("⚠️  Skipping seed — not in development environment.")
         return
 
-    with SessionLocal() as db:
-        seed_user(db)
-        seed_note(db)
+    try:
+        with SessionLocal() as db:
+            seed_user(db)
+            seed_note(db)
+            seed_folder(db)
+            seed_tag(db)
+            seed_note_with_folder_and_tag(db)
+    except OperationalError as e:
+        if "no such table" in str(e):
+            print("⚙️  Running Alembic migrations because DB is empty...")
+            subprocess.run(["alembic", "upgrade", "head"])
+            with SessionLocal() as db:
+                seed_user(db)
+                seed_note(db)
+                seed_folder(db)
+                seed_tag(db)
+                seed_note_with_folder_and_tag(db)
+        else:
+            raise
 
 if __name__ == "__main__":
     main()
