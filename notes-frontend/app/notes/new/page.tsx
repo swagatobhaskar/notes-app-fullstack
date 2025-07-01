@@ -58,7 +58,7 @@ export default function NewNote() {
                     />
                 </div>
                 {/* <textarea id="content" name="content" required value={formData.content} onChange={handleChange} /> */}
-                <Tiptap value={formData.content} />
+                {/* <Tiptap value={formData.content} /> */}
                 <div className="">
                     <button
                         type="button"
