@@ -23,7 +23,7 @@ class User(Base):
     
 
 note_tag_association = Table(
-    'note_tags',
+    'note_tag_association',
     Base.metadata,
     Column('note_id', Integer, ForeignKey('notes.id')),
     Column('tag_id', Integer, ForeignKey('tags.id')),
@@ -53,7 +53,7 @@ class Tag(Base):
     __tablename__ = 'tags'
     
     id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False)
+    name = Column(String, nullable=False, unique=True)
     # Many to many relation with notes
     notes = relationship("Note", secondary=note_tag_association, back_populates='tags')
 
@@ -61,7 +61,6 @@ class Folder(Base):
     __tablename__ = 'folders'
 
     id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False)
+    name = Column(String, nullable=False, unique=True)
     # One to many relation with notes
     notes = relationship('Note', back_populates='folder')
-    
