@@ -1,10 +1,12 @@
 from fastapi import HTTPException, Request, Response, Depends, APIRouter, Query, status, Cookie
 # from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from datetime import timedelta
 from jose import jwt
 from jose.exceptions import JWTError
 from sqlalchemy.exc import SQLAlchemyError
+import secrets
 
 from app.dependencies import get_db
 from app.models import User
@@ -65,12 +67,27 @@ def register(response: Response, new_user: user_schema.UserCreate, db: Session =
         path="/refresh-token"     # Limit access to only the refresh-token route
     )
 
+    # CSRF cookie for added CSRF protection
+    csrf_token = secrets.token_urlsafe(32)
+
+    response.set_cookie(
+        key="csrf_token",
+        value=csrf_token,
+        httponly=False,  # Must be readable by JS
+        secure=True,
+        samesite="strict"
+    )
+
+    # Frontend must send this in a custom header on requests:
+    # e.g., X-CSRF-Token: <csrf_token>
+
     return {
         'message': "New user created successfully!",
         'user': db_user,
         'token_type': 'bearer',
         'access_token': access_token,
-        'refresh_token': refresh_token
+        'refresh_token': refresh_token,
+        'csrf_token': csrf_token
         }
 
 
@@ -78,7 +95,9 @@ def register(response: Response, new_user: user_schema.UserCreate, db: Session =
 def login(response: Response,
         #   form_data: OAuth2PasswordRequestForm = Depends(), # not using form data
         login_data: user_schema.LoginInput,
-        db: Session = Depends(get_db)):
+        db: Session = Depends(get_db)
+        ):
+    
     user = db.query(User).filter(User.email == login_data.email).first()
     
     if not user or not security.verify_password(login_data.password, user.hashed_password):
@@ -115,11 +134,26 @@ def login(response: Response,
         path="/refresh-token"     # Limit access to only the refresh-token route
     )
 
+    # CSRF cookie for added CSRF protection
+    csrf_token = secrets.token_urlsafe(32)
+
+    response.set_cookie(
+        key="csrf_token",
+        value=csrf_token,
+        httponly=False,  # Must be readable by JS
+        secure=True,
+        samesite="strict"
+    )
+
+    # Frontend must send this in a custom header on requests:
+    # e.g., X-CSRF-Token: <csrf_token>
+
     return {
         'message': 'login successful!',
         'access_token': access_token,
         'refresh_token': refresh_token,
-        'token_type': 'bearer'
+        'token_type': 'bearer',
+        'csrf_token': csrf_token,
         }
 
 
@@ -156,4 +190,10 @@ def refresh_token(response: Response, request: Request, db: Session = Depends(ge
     except JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh token expired or invalid!")
     
-# logout route
+
+@router.post('/logout', status_code=status.HTTP_200_OK)
+def logout(response: Response):
+    response.delete_cookie(key='access_token', httponly=True, secure=True, samesite='strict')
+    response.delete_cookie(key='refresh_token', httponly=True, secure=True, samesite='strict', path='/refresh_token')
+    return {"message": "Logout successful! Cookies cleared."}
+
