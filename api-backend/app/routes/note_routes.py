@@ -21,18 +21,25 @@ def get_all_notes(db: Session = Depends(get_db), current_user: User = Depends(ge
 
 
 @router.get("/{note_id}", response_model=note_schema.NoteOut)
-def get_note_by_id(note_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    db_note = db.query(Note).filter(Note.id == note_id).first() # , Note.user_id == current_user.id
+def get_note_by_id(
+     note_id: int,
+     db: Session = Depends(get_db),
+     current_user: User = Depends(get_current_user)
+     ):
     
+    db_note = db.query(Note).filter(Note.id == note_id).first()
+    if not db_note:
+         raise HTTPException(
+              status_code=status.HTTP_404_NOT_FOUND,
+              detail=f"Note with id {note_id} not found!"
+         )
+
     # If the note exists but does not belong to the current user, raise a Forbidden error
-    if db_note and db_note.user_id != current_user.id:
+    if db_note.user_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You are not authorized to view this note."
         )
-    # If the note doesn't exist at all
-    if not db_note:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Note not found, or Not Authenticated to view content!")
 
     return db_note
 
