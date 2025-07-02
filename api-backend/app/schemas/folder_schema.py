@@ -1,20 +1,22 @@
 from pydantic import BaseModel
 
-class TagBase(BaseModel):
+class FolderBase(BaseModel):
     # id: int
     name: str
 
-class TagCreate(TagBase):
+class FolderCreate(FolderBase):
     pass
 
-class TagOut(TagBase):
+
+class FolderOut(FolderBase):
     id: int
 
     class Config:
         from_attributes = True
 
-class TagUpdate(BaseModel):
+class FolderUpdate(BaseModel):
     name: str | None = None
 
     class Config:
         from_attributes = True
+        
