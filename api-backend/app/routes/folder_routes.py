@@ -41,12 +41,12 @@ def create_Folder(new_Folder: folder_schema.FolderCreate, db: Session = Depends(
             detail="Folder creation failed. Please try again."
         )
     
-@router.patch('/{Folder_id}', response_model=folder_schema.FolderOut)
-def edit_Folder_by_id(Folder_id: int, updated_Folder: folder_schema.FolderUpdate, db: Session = Depends(get_db)):
+@router.patch('/{folder_id}', response_model=folder_schema.FolderOut)
+def edit_Folder_by_id(folder_id: int, updated_Folder: folder_schema.FolderUpdate, db: Session = Depends(get_db)):
     # Check if folder with the given id exists
-    db_folder = db.query(Folder).filter_by(id = Folder_id).first()
+    db_folder = db.query(Folder).filter_by(id = folder_id).first()
     if not db_folder:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Folder with id {Folder_id} not found!")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Folder with id {folder_id} not found!")
     
     # Check if the new name already exists
     if db.query(Folder).filter(Folder.name == updated_Folder.name).first() is not None:
@@ -61,12 +61,12 @@ def edit_Folder_by_id(Folder_id: int, updated_Folder: folder_schema.FolderUpdate
     return db_folder
 
 
-@router.delete('/{Folder_id}')
-def delete_Folder_by_id(Folder_id: int, db: Session = Depends(get_db)):
-    db_folder_to_delete = db.query(Folder).filter_by(id = Folder_id).first()
+@router.delete('/{folder_id}')
+def delete_Folder_by_id(folder_id: int, db: Session = Depends(get_db)):
+    db_folder_to_delete = db.query(Folder).filter_by(id = folder_id).first()
    
     if not db_folder_to_delete:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Folder with id {Folder_id} not found!")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Folder with id {folder_id} not found!")
 
     try:
         db.delete(db_folder_to_delete)
@@ -75,7 +75,7 @@ def delete_Folder_by_id(Folder_id: int, db: Session = Depends(get_db)):
         db.rollback()
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail=f"Folder with id {Folder_id} could not be deleted due to related data (conflict)."
+            detail=f"Folder with id {folder_id} could not be deleted due to related data (conflict)."
         )
     except SQLAlchemyError as e:
         db.rollback()
