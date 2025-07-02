@@ -85,3 +85,5 @@ def delete_tag_by_id(tag_id: int, db: Session = Depends(get_db)):
         )
     
     return Response(status_code=status.HTTP_204_NO_CONTENT) # No content is returned as per 204 status
+
+# Retrieve all tags with their associated blogs

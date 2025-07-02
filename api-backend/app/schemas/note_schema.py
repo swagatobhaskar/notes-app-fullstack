@@ -3,7 +3,9 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 from datetime import datetime
 import re
 
+# from app.models import Tag
 from .user_schema import UserOut
+from .tag_schema import TagOut
 class NoteBase(BaseModel):
     id: int | None = None   # auto-populated
     user_id: int | None = None  # auto-populated
@@ -12,14 +14,16 @@ class NoteBase(BaseModel):
     content: str
     created_at: datetime | None = None  # auto-populated
     updated_at: datetime | None = None  # auto-populated
+    tag_ids: list[int] = []
 
     class Config:
+        arbitrary_types_allowed=True
         from_attributes = True # Needed to read SQLAlchemy objects
 
 class NoteCreate(NoteBase):
     title: str = Field(..., min_length=10, max_length=50)
     content: str = Field(..., min_length=10)
-
+    
     @field_validator('title')
     @classmethod
     def check_title_is_not_empty(cls, value: str):
@@ -36,7 +40,7 @@ class NoteCreate(NoteBase):
 
 
 class NoteOut(NoteBase):
-
+    tags: list[TagOut]
     class Config:
         from_attributes = True # Needed to read SQLAlchemy objects
 
