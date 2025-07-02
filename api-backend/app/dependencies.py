@@ -44,6 +44,12 @@ def get_current_user(token: str = Depends(get_token_from_cookie), db: Session = 
     
     return user
 
+def verify_csrf(request: Request):
+    csrf_cookie = request.cookies.get('csrf_token')
+    csrf_header = request.headers.get('X_CSRF_Token')
+    if not csrf_cookie or not csrf_header or csrf_cookie != csrf_header:
+        raise HTTPException(status_code=403, detail="Invalid CSRF token")
+
 
 #
 # DO NOT REMOVE
