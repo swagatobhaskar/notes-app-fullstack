@@ -23,7 +23,7 @@ class User(Base):
     
 
 note_tag_association = Table(
-    'note_tags',
+    'note_tag_association',
     Base.metadata,
     Column('note_id', Integer, ForeignKey('notes.id')),
     Column('tag_id', Integer, ForeignKey('tags.id')),
