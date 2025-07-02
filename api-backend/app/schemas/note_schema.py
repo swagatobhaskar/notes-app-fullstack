@@ -1,4 +1,4 @@
-from typing import Optional, Self
+from typing import List, Optional, Self
 from pydantic import BaseModel, Field, field_validator, model_validator
 from datetime import datetime
 import re
@@ -14,7 +14,7 @@ class NoteBase(BaseModel):
     content: str
     created_at: datetime | None = None  # auto-populated
     updated_at: datetime | None = None  # auto-populated
-    tag_ids: list[int] = []
+    tag_ids: List[int] = []
 
     class Config:
         arbitrary_types_allowed=True
@@ -38,9 +38,8 @@ class NoteCreate(NoteBase):
             raise ValueError("Title can only contain letters, numbers, spaces, hyphens, and underscores.")
         return v
 
-
 class NoteOut(NoteBase):
-    tags: list[TagOut]
+    tags: List[TagOut]
     class Config:
         from_attributes = True # Needed to read SQLAlchemy objects
 

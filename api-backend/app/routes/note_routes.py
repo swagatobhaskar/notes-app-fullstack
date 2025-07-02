@@ -1,4 +1,5 @@
 import logging
+from typing import List
 from fastapi import HTTPException, Request, Depends, APIRouter, Query, status
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
@@ -35,6 +36,20 @@ def no_auth_create_note(new_note: note_schema.NoteCreate, db: Session = Depends(
     db.commit()
     db.refresh(note)
     return note
+
+
+@router.get('/unsafe/tags', response_model=List[note_schema.NoteOut])
+async def no_auth_get_notes_by_tags(tags: List[str] = Query(...), db: Session = Depends(get_db)):
+    # Query blogs that have any of the provided tags
+    notes_by_tags = db.query(Note).join(Note.tags).filter(Tag.name.in_(tags)).distinct().all()
+
+    if not notes_by_tags:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No note found for the provided tags"
+        )
+    
+    return notes_by_tags
 
 
 # get all notes of the logged in user
@@ -109,7 +124,11 @@ def delete_note_by_id(note_id: int, current_user: User = Depends(get_current_use
 
 
 @router.post("/", response_model=note_schema.NoteOut)
-def create_note(new_note: note_schema.NoteCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def create_note(
+    new_note: note_schema.NoteCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+    ):
     try:
         db_note = Note(title=new_note.title, content=new_note.content, owner=current_user)
 
@@ -137,3 +156,55 @@ def create_note(new_note: note_schema.NoteCreate, db: Session = Depends(get_db),
 
 
 # Retrieve all blogs with their associated tags
+# GET /note/tags/?tags=Python&tags=FastAPI
+@router.get('/tags', response_model=List[note_schema.NoteOut])
+async def get_notes_by_tags(
+    tags: List[str] = Query(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+    ):
+    # Query notes that have any of the provided tags, for the authenticated user
+    notes_by_tags = (
+        db.query(Note)
+        .join(Note.tags)
+        .filter(
+            Tag.name.in_(tags),
+            Note.owner==current_user
+        )
+        .distinct()
+        .all()
+    )
+
+    if not notes_by_tags:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No note found for the provided tags"
+        )
+    
+    return notes_by_tags
+
+
+# Get notes by folder
+@router.get('/folder/{folder_id}', response_model=List[note_schema.NoteOut])
+async def get_notes_by_folder(
+    folder_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+    ):
+    # Query notes that belong to the queried folder, for the authenticated user
+    notes_by_folder = (
+        db.query(Note)
+        .filter(
+            Note.folder_id == folder_id,
+            Note.owner == current_user
+            )
+        .all()
+        )
+    
+    if not notes_by_folder:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No note found in this folder"
+        )
+    
+    return notes_by_folder
