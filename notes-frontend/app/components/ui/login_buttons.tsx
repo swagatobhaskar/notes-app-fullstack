@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from 'next/navigation';
 
-export default function LoginButtons() {
+export default function LoginButtons({email}) {
     const pathname = usePathname();
     const isLoggedIn: boolean = true;
 
@@ -13,12 +13,15 @@ export default function LoginButtons() {
 
     if (isLoggedIn) {
         return (
-            <Link
-                href={"#"}
-                className="bg-gray-300 hover:bg-white hover:cursor-pointer text-black px-2 py-1 rounded-sm"
+            <div>
+                <p>{email}</p>
+                <Link
+                    href={"#"}
+                    className="bg-gray-300 hover:bg-white hover:cursor-pointer text-black px-2 py-1 rounded-sm"
                 >
                     Log Out
-            </Link>
+                </Link>
+            </div>
         );
     } 
 
