@@ -20,7 +20,7 @@ export default function Notes() {
   const router = useRouter();
 
   const [notes, setNotes] = useState<Note[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   const truncateText = (text: string, maxLength: number = 20): string => {
@@ -41,27 +41,10 @@ export default function Notes() {
       console.error(err)
       setError(err.message)
     })
+    .finally(() => {
+      setLoading(false);
+    })
     
-    // async function fetchNotes() {
-    //     try {
-    //         const res = await fetch('http://127.0.0.1:8000/api/note', {
-    //           method: "GET",
-    //           credentials: "include",
-    //           headers: {
-    //             'Content-Type': 'application/json'
-    //           }
-    //         });
-    //         const result = await res.json();
-    //         setNotes(result);
-    //         console.log(result);
-    //     } catch (error) {
-    //         console.error('Error fetching data:', error);
-    //     } finally {
-    //         setLoading(false);
-    //     }
-    // }
-
-    // fetchNotes();
   }, [])
 
   if (loading) return <p>Loading...</p>;

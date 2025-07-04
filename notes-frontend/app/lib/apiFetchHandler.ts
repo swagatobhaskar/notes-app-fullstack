@@ -19,7 +19,7 @@ export async function apiFetch<T = any>(
     const res = await fetch(input, config)
 
     if (res.status === 401 && retry) {
-        const refreshRes = await fetch('/auth/refresh-token', {
+        const refreshRes = await fetch('/api/auth/refresh-token', {
             method: 'POST',
             credentials: 'include',
         })

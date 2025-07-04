@@ -1,6 +1,7 @@
 "use client"
 
 import Tiptap from "@/app/components/Tiptap";
+import { apiPost } from "@/app/lib/apiFetchHandler";
 import { useRouter } from "next/navigation"
 import React, { useState } from "react"
 
@@ -16,20 +17,17 @@ export default function NewNote() {
     const handleNewNoteSubmit= async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const response = await fetch("http://127.0.0.1:8000/api/note", {
-                method: "POST",
-                credentials: "include",
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(formData),
-            })
+            const response = await apiPost<any>( //<??>
+                'http://127.0.0.1:8000/api/note',
+                formData
+            )
 
             if (!response.ok) throw new Error("Failed to save!");
             const {id} = await response.json()
-            router.push(`/notes/${id}`)
-        } catch (err) {
-            console.log(err);
+            router.push(`/notes/${id}`) // need folder name
+        } catch (err: any) {
+            console.error(err);
+            setError(err)
         }
     }
 
