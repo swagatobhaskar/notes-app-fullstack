@@ -1,5 +1,5 @@
-import Footer from "../ui/footer";
-import Header from "../ui/header";
+import Footer from "@/app/components/ui/footer";
+import Header from "@/app/components/ui/header";
 
 export default function NotesLayout({
   children,

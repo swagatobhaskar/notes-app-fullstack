@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
+import { apiGet } from "@/app/lib/apiFetchHandler";
+
 interface Note {
   id: number,
   author: string,
@@ -32,26 +34,34 @@ export default function Notes() {
   } 
 
   useEffect(() => {
-    async function fetchNotes() {
-        try {
-            const res = await fetch('http://127.0.0.1:8000/api/note', {
-              method: "GET",
-              credentials: "include",
-              headers: {
-                'Content-Type': 'application/json'
-              }
-            });
-            const result = await res.json();
-            setNotes(result);
-            console.log(result);
-        } catch (error) {
-            console.error('Error fetching data:', error);
-        } finally {
-            setLoading(false);
-        }
-    }
+    // Always await or .then() because they return a Promise.
+    apiGet<Note[]>('http://127.0.0.1:8000/api/note')
+    .then(setNotes)
+    .catch(err => {
+      console.error(err)
+      setError(err.message)
+    })
+    
+    // async function fetchNotes() {
+    //     try {
+    //         const res = await fetch('http://127.0.0.1:8000/api/note', {
+    //           method: "GET",
+    //           credentials: "include",
+    //           headers: {
+    //             'Content-Type': 'application/json'
+    //           }
+    //         });
+    //         const result = await res.json();
+    //         setNotes(result);
+    //         console.log(result);
+    //     } catch (error) {
+    //         console.error('Error fetching data:', error);
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // }
 
-    fetchNotes();
+    // fetchNotes();
   }, [])
 
   if (loading) return <p>Loading...</p>;

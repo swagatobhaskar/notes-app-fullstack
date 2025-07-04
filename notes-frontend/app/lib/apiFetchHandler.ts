@@ -1,3 +1,5 @@
+// import { useRouter } from "next/navigation"
+
 export async function apiFetch<T = any>(
     input: RequestInfo,
     init: RequestInit = {},
@@ -12,6 +14,8 @@ export async function apiFetch<T = any>(
         },
     }
 
+    // const router = useRouter()
+
     const res = await fetch(input, config)
 
     if (res.status === 401 && retry) {
@@ -24,6 +28,7 @@ export async function apiFetch<T = any>(
             return await apiFetch<T>(input, init, false)
         } else {
             throw new Error('Session expired. Please login again!')
+            // router.push('/login')
         }
     }
 

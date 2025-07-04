@@ -1,4 +1,7 @@
-## Collaborative Notes Web App.
+## Notes Web App.
+
+"email": "john.doe@example.net",
+"password": "aBcD78%JoHn@"
 
 "email": "jason.duval@lol.idk",
 "password": "12345!AbCdE#hUH"
