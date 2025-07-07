@@ -44,6 +44,10 @@ class UserOut(UserBase):   # Pydantic Model (For Returning Data)
     class Config:
         from_attributes = True
 
+class LoginInput(BaseModel):
+    email: EmailStr
+    password: str
+
 class UserLogin(BaseModel):
     message: str
     access_token: str

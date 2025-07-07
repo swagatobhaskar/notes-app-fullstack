@@ -1,7 +1,9 @@
 import os
+import subprocess
+from sqlalchemy.exc import OperationalError
 
 from app.database import SessionLocal
-from app.models import Note, User
+from app.models import Note, User, Tag, Folder
 from app.utils.security import hash_password
 
 ENV = os.getenv("ENV", "development")
@@ -30,6 +32,60 @@ def seed_user(db):
         print("⚠️  users already exist. Skipping.")
         return
 
+def seed_folder(db):
+    if not db.query(Folder).count() > 0:
+        print("📁 Seeding Folder...")
+
+        # Get user (must exist)
+        user_1 = db.query(User).filter(User.id == 1).first()
+        if not user_1:
+            print("❌ User 1 not found to assign folders to!")
+            return
+        
+        user_2 = db.query(User).filter(User.id == 2).first()
+        if not user_2:
+            print("❌ User 2 not found to assign folders to!")
+            return
+        
+        folders = [
+            Folder(name='general', user_id = user_1.id),
+            Folder(name='work', user_id=user_1.id),
+            Folder(name='work', user_id=user_2.id),
+            Folder(name='food', user_id=user_2.id)
+        ]
+
+        db.add_all(folders)
+        db.commit()
+        print("✅ Seeded Folders.")
+
+    else:
+        print("⚠️ folders already exist. Skipping.")
+        return
+
+def seed_tag(db):
+    if not db.query(Tag).count() > 0:
+        print("🏷️ Seeding Tag...")
+        
+        user_1 = db.query(User).filter_by(id=1).first()
+        user_2 = db.query(User).filter_by(id=2).first()
+        
+        tags = [
+            Tag(name='AI/ML', user_id=user_1.id),
+            Tag(name='freelance', user_id=user_1.id),
+            Tag(name='python', user_id=user_2.id),
+            Tag(name='general', user_id=user_2.id),
+            Tag(name='general', user=user_1),
+        ]
+
+        db.add_all(tags)
+        db.commit()
+        print("✅ Seeded Tags.")
+        
+    else:
+        print("⚠️  tags already exist. Skipping.")
+        return
+
+
 def seed_note(db):
     if not db.query(Note).count() > 0:
         print("📝 Seeding notes...")
@@ -51,14 +107,67 @@ def seed_note(db):
         print("⚠️  notes already exist. Skipping.")
         return
 
+
+def seed_note_with_folder_tag_user(db):
+    note = db.query(Note).filter(Note.id == 1).first()
+    if not note:
+        print("❌ Note with id=1 not found.")
+        return
+    
+    general_tag = db.query(Tag).filter(Tag.name == 'general').first()
+    if not general_tag:
+        print("❌ Tag 'general' not found.")
+        return
+    
+    if general_tag not in note.tags:
+        note.tags.append(general_tag)
+
+    # ✅ Use the note’s owner to find the right folder!
+    general_folder = (
+        db.query(Folder)
+        .filter(
+            Folder.name == 'general',
+            Folder.user_id == note.user_id  # <-- match same owner!
+            ).first()
+        )
+    if not general_folder:
+        print(f"❌ Folder 'general' for user {note.user_id} not found. \
+              \nCreating General folder and assigning to the user")
+        Folder(name="general", user_id=note.user_id)
+        print(f"✅ Folder: General Created for user: {note.user_id}!")
+        
+    note.folder = general_folder
+
+    db.commit()
+    print("✅ Seeded Note with Folder, Tag and User")
+
 def main():
     if ENV != "development":
         print("⚠️  Skipping seed — not in development environment.")
         return
-
-    with SessionLocal() as db:
-        seed_user(db)
-        seed_note(db)
+    
+    try:
+        with SessionLocal() as db:
+            seed_user(db)
+            seed_folder(db)
+            seed_tag(db)
+            seed_note(db)
+            seed_note_with_folder_tag_user(db)
+            
+    except OperationalError as e:
+        if "no such table" in str(e):
+            print("⚙️  Running Alembic migrations because DB is empty...")
+            subprocess.run(["alembic", "upgrade", "head"])
+            
+            # ✅ Re-create the session AFTER migration!
+            with SessionLocal() as db:
+                seed_user(db)
+                seed_folder(db)
+                seed_tag(db)
+                seed_note(db)
+                seed_note_with_folder_tag_user(db)
+        else:
+            raise
 
 if __name__ == "__main__":
     main()

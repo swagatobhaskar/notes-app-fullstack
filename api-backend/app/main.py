@@ -1,13 +1,15 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .routes import user_routes, note_routes, auth_routes
+from .routes import (
+    user_routes, note_routes, auth_routes, tag_routes, folder_routes
+)
 
 app = FastAPI()
 
 allowed_origins = [
     "http://localhost:3000",
-    # "202.8.112.251", # public ip
+    "http://127.0.0.1:3000"
 ]
 
 app.add_middleware(
@@ -21,6 +23,8 @@ app.add_middleware(
 app.include_router(auth_routes.router)
 app.include_router(user_routes.router)
 app.include_router(note_routes.router)
+app.include_router(tag_routes.router)
+app.include_router(folder_routes.router)
 
 @app.get("/")
 def read_root():
