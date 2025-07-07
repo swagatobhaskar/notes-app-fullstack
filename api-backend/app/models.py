@@ -37,7 +37,6 @@ class Tag(Base):
     name = Column(String, nullable=False)   # don't put unique=True, since users can create same named tags
     # Many to many relation with notes
     notes = relationship("Note", secondary=note_tag_association, back_populates='tags')
-    # Many-to-one relation with User
     # Tags are specific to users
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     user = relationship('User', back_populates='tags')
