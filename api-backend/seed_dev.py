@@ -32,35 +32,26 @@ def seed_user(db):
         print("⚠️  users already exist. Skipping.")
         return
 
-def seed_note(db):
-    if not db.query(Note).count() > 0:
-        print("📝 Seeding notes...")
-        
-        user1 = db.query(User).filter(User.id == 1).first()
-        user2 = db.query(User).filter(User.id == 2).first()
-
-        notes = [
-            Note(id=1, owner=user1, title="First Dummy Note!", content="My entirely dummy content..."),
-            Note(id=2, owner=user1, title="John's second Dummy Note!", content="John's second entirely dummy content..."),
-            Note(id=3, owner=user2, title="Alice's Dummy Note!", content="Alice's entirely dummy content...")
-        ]
-
-        db.add_all(notes)
-        db.commit()
-        print("✅ Seeded notes.")
-
-    else:
-        print("⚠️  notes already exist. Skipping.")
-        return
-
 def seed_folder(db):
     if not db.query(Folder).count() > 0:
         print("📁 Seeding Folder...")
 
+        # Get user (must exist)
+        user_1 = db.query(User).filter(User.id == 1).first()
+        if not user_1:
+            print("❌ User 1 not found to assign folders to!")
+            return
+        
+        user_2 = db.query(User).filter(User.id == 2).first()
+        if not user_2:
+            print("❌ User 2 not found to assign folders to!")
+            return
+        
         folders = [
-            Folder(name='general'),
-            Folder(name='work'),
-            Folder(name='food')
+            Folder(name='general', user_id = user_1.id),
+            Folder(name='work', user_id=user_1.id),
+            Folder(name='work', user_id=user_2.id),
+            Folder(name='food', user_id=user_2.id)
         ]
 
         db.add_all(folders)
@@ -90,7 +81,30 @@ def seed_tag(db):
         print("⚠️  tags already exist. Skipping.")
         return
 
-def seed_note_with_folder_and_tag(db):
+
+def seed_note(db):
+    if not db.query(Note).count() > 0:
+        print("📝 Seeding notes...")
+        
+        user1 = db.query(User).filter(User.id == 1).first()
+        user2 = db.query(User).filter(User.id == 2).first()
+
+        notes = [
+            Note(id=1, owner=user1, title="First Dummy Note!", content="My entirely dummy content..."),
+            Note(id=2, owner=user1, title="John's second Dummy Note!", content="John's second entirely dummy content..."),
+            Note(id=3, owner=user2, title="Alice's Dummy Note!", content="Alice's entirely dummy content...")
+        ]
+
+        db.add_all(notes)
+        db.commit()
+        print("✅ Seeded notes.")
+
+    else:
+        print("⚠️  notes already exist. Skipping.")
+        return
+
+
+def seed_note_with_folder_tag_user(db):
     note = db.query(Note).filter(Note.id == 1).first()
     if not note:
         print("❌ Note with id=1 not found.")
@@ -104,37 +118,50 @@ def seed_note_with_folder_and_tag(db):
     if general_tag not in note.tags:
         note.tags.append(general_tag)
 
-    general_folder = db.query(Folder).filter(Folder.name == 'general').first()
+    # ✅ Use the note’s owner to find the right folder!
+    general_folder = (
+        db.query(Folder)
+        .filter(
+            Folder.name == 'general',
+            Folder.user_id == note.user_id  # <-- match same owner!
+            ).first()
+        )
     if not general_folder:
-        print("❌ Folder 'general' not found.")
-        return
+        print(f"❌ Folder 'general' for user {note.user_id} not found. \
+              \nCreating General folder and assigning to the user")
+        Folder(name="general", user_id=note.user_id)
+        print(f"✅ Folder: General Created for user: {note.user_id}!")
+        
     note.folder = general_folder
 
     db.commit()
-    print("✅ Seeded Note with Folder and Tag")
+    print("✅ Seeded Note with Folder, Tag and User")
 
 def main():
     if ENV != "development":
         print("⚠️  Skipping seed — not in development environment.")
         return
-
+    
     try:
         with SessionLocal() as db:
             seed_user(db)
-            seed_note(db)
             seed_folder(db)
             seed_tag(db)
-            seed_note_with_folder_and_tag(db)
+            seed_note(db)
+            seed_note_with_folder_tag_user(db)
+            
     except OperationalError as e:
         if "no such table" in str(e):
             print("⚙️  Running Alembic migrations because DB is empty...")
             subprocess.run(["alembic", "upgrade", "head"])
+            
+            # ✅ Re-create the session AFTER migration!
             with SessionLocal() as db:
                 seed_user(db)
-                seed_note(db)
                 seed_folder(db)
                 seed_tag(db)
-                seed_note_with_folder_and_tag(db)
+                seed_note(db)
+                seed_note_with_folder_tag_user(db)
         else:
             raise
 

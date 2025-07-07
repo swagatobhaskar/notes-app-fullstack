@@ -5,6 +5,22 @@ import datetime
 
 from .database import Base
 
+
+class Folder(Base):
+    __tablename__ = 'folders'
+
+    id = Column(Integer, primary_key=True)
+    # Different users may create folders for themselves which can have same names
+    name = Column(String, nullable=False, unique=False)
+    # One to many relation with notes
+    notes = relationship('Note', back_populates='folder')
+    # Many-to-one relation with User
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    user = relationship('User', back_populates='folders')
+    
+    def __repr__(self):
+        return f"Folder(id={self.id}, name={self.name}, user_id={self.user_id})"
+    
 class User(Base):
     __tablename__ = 'users'
 
@@ -17,6 +33,8 @@ class User(Base):
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
     # One-to-many relation with Note
     notes = relationship("Note", back_populates="owner")
+    # One-to-many relation with Folder
+    folders = relationship('Folder', back_populates='user')
 
     def __repr__(self):
         return f"User(id=${self.id}, email={self.email})"
@@ -56,12 +74,7 @@ class Tag(Base):
     name = Column(String, nullable=False, unique=True)
     # Many to many relation with notes
     notes = relationship("Note", secondary=note_tag_association, back_populates='tags')
-
-class Folder(Base):
-    __tablename__ = 'folders'
-
-    id = Column(Integer, primary_key=True)
-    # Different users may create folders for themselves which can have same names
-    name = Column(String, nullable=False, unique=False)
-    # One to many relation with notes
-    notes = relationship('Note', back_populates='folder')
+    
+    def __repr__(self):
+        return f"Folder(id={self.id}, name={self.name})"
+    
