@@ -228,19 +228,21 @@ def get_notes_by_tags(
     return notes_by_tags
 
 
-# Get notes by folder
-@router.get('/folder/{folder_id}', response_model=List[note_schema.NoteOut])
+# Get notes by folder for the authenticated user
+# GET /api/note/{folder_id}
+@router.get('/{folder_id}', response_model=List[note_schema.NoteOut])
 def get_notes_by_folder(
     folder_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
     ):
     # Query notes that belong to the queried folder, for the authenticated user
-    notes_by_folder = db.query(Note).filter(
-        Note.folder_id == folder_id,
-        Note.owner == current_user
-        ).all()
-    
+    notes_by_folder = (
+        db.query(Note).filter(
+            Note.folder_id == folder_id,
+            Note.owner == current_user
+            ).all()
+        )
     if not notes_by_folder:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
