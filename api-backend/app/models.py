@@ -61,6 +61,7 @@ class Folder(Base):
     __tablename__ = 'folders'
 
     id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False, unique=True)
+    # Different users may create folders for themselves which can have same names
+    name = Column(String, nullable=False, unique=False)
     # One to many relation with notes
     notes = relationship('Note', back_populates='folder')
