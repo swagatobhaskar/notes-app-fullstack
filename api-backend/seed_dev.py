@@ -65,12 +65,16 @@ def seed_folder(db):
 def seed_tag(db):
     if not db.query(Tag).count() > 0:
         print("🏷️ Seeding Tag...")
-
+        
+        user_1 = db.query(User).filter_by(id=1).first()
+        user_2 = db.query(User).filter_by(id=2).first()
+        
         tags = [
-            Tag(name='AI/ML'),
-            Tag(name='freelance'),
-            Tag(name='python'),
-            Tag(name='general')
+            Tag(name='AI/ML', user_id=user_1.id),
+            Tag(name='freelance', user_id=user_1.id),
+            Tag(name='python', user_id=user_2.id),
+            Tag(name='general', user_id=user_2.id),
+            Tag(name='general', user=user_1),
         ]
 
         db.add_all(tags)
