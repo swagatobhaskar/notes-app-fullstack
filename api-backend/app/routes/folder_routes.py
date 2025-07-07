@@ -3,13 +3,13 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 
 from app.dependencies import get_db, get_current_user
-from app.models import Folder
+from app.models import Folder, User
 from app.schemas import folder_schema
 
 router = APIRouter(prefix="/api/folder", tags=["folder"])
 
 @router.get('/', response_model=list[folder_schema.FolderOut])
-def get_all_Folders(db: Session = Depends(get_db)):
+def get_all_Folders(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     db_folders = db.query(Folder).all()
     return db_folders
 
