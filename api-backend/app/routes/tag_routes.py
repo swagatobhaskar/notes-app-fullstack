@@ -12,7 +12,7 @@ router = APIRouter(prefix="/api/tag", tags=["tag"])
 def get_all_tags(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
-    ):
+):
     db_tags = db.query(Tag).filter(Tag.user == current_user).all()
     return db_tags
 
@@ -22,17 +22,18 @@ def get_tag_by_id(
     tag_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
-    ):
-    db_tag = (db.query(Tag)
-              .filter(Tag.id == tag_id, Tag.user == current_user)
-              .first()
-              )
+):
+    db_tag = (
+        db.query(Tag)
+        .filter(Tag.id == tag_id, Tag.user == current_user)
+        .first()
+    )
     
     if not db_tag:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Tag with id {tag_id} not found!"
-            )
+        )
     
     return db_tag
 
@@ -42,12 +43,12 @@ def create_tag(
     new_tag: tag_schema.TagCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
-    ):
+):
     if (
         db.query(Tag)
         .filter(Tag.name == new_tag.name, Tag.user == current_user)
         .first()
-        ):
+    ):
         raise HTTPException(status_code=400, detail="Tag already exists!")
     
     try:
@@ -70,29 +71,30 @@ def edit_tag_by_id(
     updated_tag: tag_schema.TagUpdate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
-    ):
+):
     # Check if tag with the given id exists
     db_tag = (
         db.query(Tag)
         .filter(Tag.id == tag_id, Tag.user == current_user)
         .first()
-        )
+    )
+    
     if not db_tag:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Tag with id {tag_id} not found!"
-            )
+        )
     
     # Check if the new name already exists
     if (
         db.query(Tag)
         .filter(Tag.name == updated_tag.name, Tag.user == current_user)
         .first()
-        ) is not None:
+    ) is not None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Tag with this name already exists."
-            )
+        )
 
     if updated_tag.name:
         db_tag.name = updated_tag.name
@@ -108,18 +110,18 @@ def delete_tag_by_id(
     tag_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
-    ):
+):
     db_tag_to_delete = (
         db.query(Tag)
         .filter(Tag.id == tag_id, Tag.user == current_user)
         .first()
-        )
+    )
    
     if not db_tag_to_delete:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Tag with id {tag_id} not found!"
-            )
+        )
 
     try:
         db.delete(db_tag_to_delete)

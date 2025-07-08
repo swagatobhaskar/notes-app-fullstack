@@ -19,7 +19,11 @@ settings = get_settings()
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 @router.post("/register", response_model=user_schema.UserOutWithToken)
-def register(response: Response, new_user: user_schema.UserCreate, db: Session = Depends(get_db)):
+def register(
+    response: Response,
+    new_user: user_schema.UserCreate,
+    db: Session = Depends(get_db)
+):
     # Check if user already exists
     if db.query(User).filter(User.email == new_user.email).first():
         raise HTTPException(status_code=400, detail="Email already registered!")
@@ -38,7 +42,8 @@ def register(response: Response, new_user: user_schema.UserCreate, db: Session =
         access_token = jwt_config.create_access_token(
             data = {"sub": str(db_user.id)},
             expires_delta = timedelta(minutes=settings.access_token_expire_minutes)
-            )
+        )
+        
         refresh_token = jwt_config.create_refresh_token(
             data = {"sub": str(db_user.id)},
             expires_delta = timedelta(minutes=settings.refresh_token_expire_days)
@@ -88,16 +93,16 @@ def register(response: Response, new_user: user_schema.UserCreate, db: Session =
         'access_token': access_token,
         'refresh_token': refresh_token,
         'csrf_token': csrf_token
-        }
+    }
 
 
 @router.post("/login", response_model=user_schema.UserLogin)
-def login(response: Response,
-        #   form_data: OAuth2PasswordRequestForm = Depends(), # not using form data
-        login_data: user_schema.LoginInput,
-        db: Session = Depends(get_db)
-        ):
-    
+def login(
+    response: Response,
+    # form_data: OAuth2PasswordRequestForm = Depends(), # not using form data
+    login_data: user_schema.LoginInput,
+    db: Session = Depends(get_db)
+):
     user = db.query(User).filter(User.email == login_data.email).first()
     
     if not user or not security.verify_password(login_data.password, user.hashed_password):
@@ -154,7 +159,7 @@ def login(response: Response,
         'refresh_token': refresh_token,
         'token_type': 'bearer',
         'csrf_token': csrf_token,
-        }
+    }
 
 
 @router.post("/refresh-token", response_model=user_schema.TokenSchema)

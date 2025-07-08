@@ -19,7 +19,10 @@ def user_profile(current_user: User = Depends(get_current_user)):
 
 
 @router.delete("/", response_model=user_schema.UserDelete)
-def delete_user(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def delete_user(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     try:
         db.delete(current_user)
         db.commit()
@@ -27,12 +30,18 @@ def delete_user(current_user: User = Depends(get_current_user), db: Session = De
     except IntegrityError:
         # Catch integrity error (e.g., foreign key constraint violation)
         db.rollback()
-        raise HTTPException(status_code=400, detail="Cannot delete user due to linked records.")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot delete user due to linked records."
+        )
     except Exception as e:
         # Catch all other exceptions
         db.rollback()
         logging.exception("Failed to delete user")
-        raise HTTPException(status_code=500, detail="Could not delete user, please try again!")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Could not delete user, please try again!"
+        )
 
 
 @router.patch("/", response_model=user_schema.UpdateProfileResponse)
@@ -40,7 +49,7 @@ def update_profile(
     updated_user: user_schema.UserPatch,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
-    ):
+):
     try:
         db_user = db.query(User).filter(User.id == current_user.id).first()
         if not db_user:

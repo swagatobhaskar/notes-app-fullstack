@@ -21,19 +21,19 @@ def get_folder_by_id(
     folder_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
-    ):
+):
     db_folder = (
         db.query(Folder).filter(
             Folder.id == folder_id,
             Folder.user_id == current_user.id
-            ).first()
-        )
+        ).first()
+    )
     
     if not db_folder:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Folder with id {folder_id} not found!"
-            )
+        )
     
     return db_folder
 
@@ -44,14 +44,14 @@ def create_Folder(
     new_Folder: folder_schema.FolderCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
-    ):
+):
     # Check if folder with this name already exists for the user
     if (
         db.query(Folder).filter(
             Folder.name == new_Folder.name,
             Folder.user_id == current_user.id
-            ).first()
-        ):
+        ).first()
+    ):
         raise HTTPException(status_code=400, detail="Folder already exists!")
     
     try:
@@ -73,7 +73,7 @@ def edit_Folder_by_id(
     updated_Folder: folder_schema.FolderUpdate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
-    ):
+):
     # Check if folder with the given id exists
     db_folder = db.query(Folder).filter(Folder.id == folder_id, Folder.user_id == current_user.id).first()
     if not db_folder:
@@ -97,7 +97,7 @@ def delete_Folder_by_id(
     folder_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
-    ):
+):
     db_folder_to_delete = db.query(Folder).filter(Folder.id == folder_id, Folder.user_id == current_user.id).first()
    
     if not db_folder_to_delete:
