@@ -46,7 +46,7 @@ def register(
         
         refresh_token = jwt_config.create_refresh_token(
             data = {"sub": str(db_user.id)},
-            expires_delta = timedelta(minutes=settings.refresh_token_expire_days)
+            expires_delta = timedelta(days=settings.refresh_token_expire_days)
         )
     except (JWTError, SQLAlchemyError, Exception) as e:
         # Delete created user or undo any changes if JWT creation fails
@@ -115,7 +115,7 @@ def login(
         )
         refresh_token = jwt_config.create_refresh_token(
             data = {"sub": str(user.id)},
-            expires_delta = timedelta(minutes=settings.refresh_token_expire_days)
+            expires_delta = timedelta(days=settings.refresh_token_expire_days)
         )
     except (JWTError, Exception) as e:
         raise HTTPException(status_code=500, detail="Login failed, Please try again!")
@@ -164,8 +164,9 @@ def login(
 
 @router.post("/refresh-token", response_model=user_schema.TokenSchema)
 def refresh_token(response: Response, request: Request, db: Session = Depends(get_db)):
-    print("COOKIE: ", request.cookies)
+    # print("COOKIE: ", request.cookies)
     refresh_token_from_cookie = request.cookies.get("refresh_token")
+    
     if not refresh_token_from_cookie:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh token missing")
     
@@ -201,4 +202,3 @@ def logout(response: Response):
     response.delete_cookie(key='access_token', httponly=True, secure=True, samesite='strict')
     response.delete_cookie(key='refresh_token', httponly=True, secure=True, samesite='strict', path='/refresh_token')
     return {"message": "Logout successful! Cookies cleared."}
-
