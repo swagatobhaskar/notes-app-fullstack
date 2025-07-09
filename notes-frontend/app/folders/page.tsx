@@ -23,6 +23,7 @@ export default function AllUserCreatedFoldersPage() {
         const fetchFoldersForCurrentUser = async () => {
             try {
                 const foldersData = await apiGet<Folder[]>('http://127.0.0.1:8000/api/folder')
+                console.log("foldersData--", foldersData)
                 setFolders(foldersData)
             } catch(err: any) {
                 console.error(err)

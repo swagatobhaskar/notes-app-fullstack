@@ -37,7 +37,7 @@ export default function Login() {
             }
             // handle successful login here
             console.log("Login Successful!", data);
-            router.push("/notes");
+            router.push("/folders");
             
         } catch (err) {
             if (err instanceof Error) {

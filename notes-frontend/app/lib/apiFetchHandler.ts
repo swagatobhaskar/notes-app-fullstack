@@ -19,6 +19,7 @@ export async function apiFetch<T = any>(
     const res = await fetch(input, config)
 
     if (res.status === 401 && retry) {
+        console.log("RETRY AFTER 401")
         const refreshRes = await fetch('/api/auth/refresh-token', {
             method: 'POST',
             credentials: 'include',

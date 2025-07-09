@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 
 import { apiGet } from "@/app/lib/apiFetchHandler";
@@ -18,6 +18,7 @@ interface Note {
 export default function Notes() {
 
   const router = useRouter();
+  const { folder_name } = useParams<{folder_name: string}>()
 
   const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -35,7 +36,7 @@ export default function Notes() {
 
   useEffect(() => {
     // Always await or .then() because they return a Promise.
-    apiGet<Note[]>('http://127.0.0.1:8000/api/note')
+    apiGet<Note[]>(`http://127.0.0.1:8000/api/note/folder/${folder_name}`)
     .then(setNotes)
     .catch(err => {
       console.error(err)

@@ -1,7 +1,7 @@
 import Footer from "@/app/components/ui/footer";
 import Header from "@/app/components/ui/header";
 
-export default function NotesLayout({
+export default function IntoTheFolderLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
