@@ -32,11 +32,11 @@ export default function Notes() {
     if (updated_at !== created_at) {
       return <p>Updated at: {new Date(updated_at).toLocaleString()}</p>
     }
-  } 
+  }
 
   useEffect(() => {
     // Always await or .then() because they return a Promise.
-    apiGet<Note[]>(`http://127.0.0.1:8000/api/note/folder/${folder_name}`)
+    apiGet<Note[]>(`${process.env.NEXT_PUBLIC_API_URL}/note/folder/${folder_name}`)
     .then(setNotes)
     .catch(err => {
       console.error(err)
@@ -55,7 +55,7 @@ export default function Notes() {
     <div className="flex flex-col">
       <div id="new-button" className=" my-4">
         <Link
-          href={"/notes/new"}
+          href={`/folders/${folder_name}/note/new`}
           className="text-white font-semibold text-xl px-5 py-2.5 rounded-md bg-blue-400 hover:bg-blue-500 float-right"
         >
           New

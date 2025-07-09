@@ -8,11 +8,7 @@ export default function IntoTheFolderLayout({
 }>) {
   return (
     <div className="relative flex flex-col min-h-screen">
-      <Header />
-      <main className="flex flex-1 bg-white items-center justify-center"> 
-        {children}
-      </main>
-      <Footer />
+      {children}
     </div>
   );
 }
