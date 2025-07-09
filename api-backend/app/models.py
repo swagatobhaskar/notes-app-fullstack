@@ -17,6 +17,10 @@ class Folder(Base):
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     user = relationship('User', back_populates='folders')
     
+    # Add later
+    # If you want to make folder names unique per user, add a unique_constraint like:
+    # __table_args__ = (UniqueConstraint('name', 'owner_id'),)
+    
     def __repr__(self):
         return f"Folder(id={self.id}, name={self.name}, user_id={self.user_id})"
 
