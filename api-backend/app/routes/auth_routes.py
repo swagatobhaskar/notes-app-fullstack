@@ -200,5 +200,5 @@ def refresh_token(response: Response, request: Request, db: Session = Depends(ge
 @router.post('/logout', status_code=status.HTTP_200_OK)
 def logout(response: Response):
     response.delete_cookie(key='access_token', httponly=True, secure=True, samesite='strict')
-    response.delete_cookie(key='refresh_token', httponly=True, secure=True, samesite='strict', path='/refresh_token')
+    response.delete_cookie(key='refresh_token', httponly=True, secure=True, samesite='strict') #, path='/refresh_token')
     return {"message": "Logout successful! Cookies cleared."}
