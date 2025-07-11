@@ -4,8 +4,8 @@ import { useCallback, useState } from 'react'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
-    faBold, faItalic, faQuoteLeft, faUnderline, faStrikethrough,
-    faImage, faHighlighter, faQuoteRightAlt, faCode, faList, faListNumeric,
+    faBold, faItalic, faUnderline, faStrikethrough,
+    faImage, faHighlighter, faCode, faList, faListNumeric,
     faLink, faLinkSlash, faBarsStaggered, faHeading
 } from '@fortawesome/free-solid-svg-icons'
 
@@ -18,7 +18,7 @@ import Image from '@tiptap/extension-image'
 
 const Tiptap = ({content, onchange}) => {
 
-    const [headingLevel, setHeadingLevel] = useState<Number>(1);
+    const [headingLevel, setHeadingLevel] = useState(1);
 
     const editor = useEditor({
         immediatelyRender: false,
@@ -94,7 +94,7 @@ const Tiptap = ({content, onchange}) => {
         ],
         editorProps: {
             attributes: {
-                class: 'flex-1 mx-1 overflow-y-auto p-1 rounded-md outline outline-gray-500 h-[70vh]'
+                class: 'mx-1 overflow-y-auto p-2 rounded-md outline outline-gray-300 h-[70vh]'
             }
         },
         content: content,
@@ -104,7 +104,6 @@ const Tiptap = ({content, onchange}) => {
         //     ',
 
         onUpdate: ({editor}) => {
-            // console.log(editor.getHTML())
             onchange(editor.getHTML());
         }
     })
@@ -144,7 +143,7 @@ const Tiptap = ({content, onchange}) => {
 
     return (
         <div className='h-full'>
-            <div className='my-3 mx-1 p-1 grid grid-rows-2 grid-cols-10 outline-2 outline-slate-500 rounded-md gap-y-2'>
+            <div className='my-3 mx-1 p-1 flex flex-row justify-around bg-slate-300 rounded-md gap-y-2'>
                 {/* Bold */}
                 <button
                     className={editor.isActive('bold')? 'bg-gray-100' : "rte_toolbar_btn"}
@@ -324,11 +323,9 @@ const Tiptap = ({content, onchange}) => {
                     <FontAwesomeIcon icon={faImage} />
                 </button>
             </div>
-            <div className='flex flex-col '>
-                <EditorContent
-                    editor={editor}
-                />
-            </div>
+            <>
+                <EditorContent editor={editor} />
+            </>
         </div>
     );
 }

@@ -1,69 +1,78 @@
 "use client"
 
-import Tiptap from "@/app/components/Tiptap";
-import { apiPost } from "@/app/lib/apiFetchHandler";
-import { useRouter } from "next/navigation"
+import { useRouter, useParams } from "next/navigation"
 import React, { useState } from "react"
 
+import Tiptap from "@/app/components/Tiptap";
+import { apiPost } from "@/app/lib/apiFetchHandler";
+
 export default function NewNote() {
-    const [formData, setFormData] = useState({
-        title: '',
-        content: ''
-    });
+
+    const {folder_name} = useParams<{folder_name: string}>()
+
+    const [title, setTitle] = useState<string>('');
+    const [content, setContent] = useState<string>('');
     const [error, setError] = useState<string | null>(null);
 
     const router = useRouter();
 
-    const handleNewNoteSubmit= async (e: React.FormEvent) => {
+    const handleNewNoteSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        const modified_title = JSON.stringify(title)
+        const formData = {
+            title: modified_title.slice(1, -1),
+            content: JSON.stringify(content)
+        }
+
+        console.log("FORMDATA:: ", formData)
+
         e.preventDefault();
         try {
-            const response = await apiPost<any>( //<??>
-                'http://127.0.0.1:8000/api/note',
+            const response = await apiPost<any>(
+                `${process.env.NEXT_PUBLIC_API_URL}/note`,
                 formData
             )
-
             if (!response.ok) throw new Error("Failed to save!");
             const {id} = await response.json()
-            router.push(`/notes/${id}`) // need folder name
+            const note_id = id
+            router.push(`folders/${folder_name}/${note_id}`) // need folder name
         } catch (err: any) {
             console.error(err);
             setError(err)
         }
     }
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target;
-        setFormData((prevData) => ({
-            ...prevData,
-            [name]: value
-        }));
+    const handleContentChange = (content: string) => {
+        setContent(content)
+        console.log(content)
     }
 
     // periodically save as draft or to localStorage
 
     return (
-        <div className="min-w-[70vw] max-w-[70vw] self-start">
+        <div className="mx-auto min-w-[60vw] max-w-[60vw]">
             <form onSubmit={handleNewNoteSubmit}>
-                <div className="">
-                    <label htmlFor="title" className="">Title</label>
+                <div className="flex flex-row items-baseline">
+                    <label htmlFor="title" className="font-semibold text-xl w-fit">Title</label>
                     <input
                         type="text"
                         id="title"
                         name="title"
                         required
-                        value={formData.title}
-                        onChange={handleChange}
+                        value={title}
+                        onChange={e => setTitle(e.target.value)}
+                        className="w-full ml-2 px-4 py-2 border border-gray-300 rounded-md focus:ring-gray-500 focus:border-gray-500"
                     />
                 </div>
-                {/* <textarea id="content" name="content" required value={formData.content} onChange={handleChange} /> */}
-                {/* <Tiptap value={formData.content} /> */}
-                <div className="">
+                {/* Tiptap */}
+                <Tiptap onchange={handleContentChange} content={content} />
+                <div className="float-right">
                     <button
                         type="button"
                         onClick={() => {
                             const confirmed = window.confirm('Are you sure you want to cancel your changes?');
                             if (confirmed) {
-                                setFormData({title:'', content:''})
+                                setTitle('')
+                                setContent('')
                                 router.push(`/notes/`)
                             }
                         }}

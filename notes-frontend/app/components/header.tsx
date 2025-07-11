@@ -14,7 +14,7 @@ export default async function Header() {
     // Only fetch data if cookies are available on the server side
     // i.e., user is logged in
     if (serverCookies) {
-        const res = await fetch('http://127.0.0.1:8000/api/user', {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user`, {
             headers: {
                 Cookie: (await serverCookies).toString(),
             },

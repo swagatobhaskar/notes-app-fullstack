@@ -1,5 +1,5 @@
-import Footer from "../components/ui/footer";
-import Header from "../components/ui/header";
+import Footer from "../components/footer";
+import Header from "../components/header";
 
 export default function FolderSLayout({
     children,
@@ -9,7 +9,7 @@ export default function FolderSLayout({
     return (
         <div className="relative flex flex-col min-h-screen">
             <Header />
-            <main className="flex flex-1 items-center justify-center bg-gray-100">
+            <main className="flex flex-1 justify-center bg-gray-100"> {/*items-center*/}
                 {children}
             </main>
             <Footer />

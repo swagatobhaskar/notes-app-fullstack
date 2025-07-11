@@ -35,11 +35,20 @@ export default function AllUserCreatedFoldersPage() {
     }
 
     return (
-        <div className="">
-            <h2 className="text-xl font-bold mb-2">Folders</h2>
+        <div className="mt-4">
             {error && <p className="text-red-500">{error}</p>}
+            {/* New Folder Button */}
+            <div
+                onClick={() => {alert("Modal to Create New Folder")}}
+                title="New Folder"
+                className="hover:bg-gray-200 my-3 p-3 rounded-md cursor-pointer w-fit"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 10.5v6m3-3H9m4.06-7.19-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
+                </svg>
+            </div>
             {folders.length === 0 ? (
-                <p>No folders available.</p>
+                <p className="font-semibold text-lg">No folders available.</p>
             ):(
                 <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                     {folders.map(folder => (
@@ -54,23 +63,16 @@ export default function AllUserCreatedFoldersPage() {
                                     </svg>
                                     <p
                                         title={folder.name}
-                                        className="text-center truncate w-full">{folder.name}</p>
+                                        className="text-center truncate w-full"
+                                    >
+                                        {folder.name}
+                                    </p>
                                 </div>
                             </Link>
                         </li>
                     ))}
                 </ul>
             )}
-            {/* New Folder Button */}
-            <div
-                onClick={() => {alert("Modal to Create New Folder")}}
-                title="New Folder"
-                className="hover:bg-gray-200 p-3 rounded-md cursor-pointer w-fit"
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 10.5v6m3-3H9m4.06-7.19-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
-                </svg>
-            </div>
         </div>
     )
 }
