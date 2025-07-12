@@ -16,6 +16,7 @@ interface Note {
 export default function SelectedNotePage() {
     const router = useRouter();
     const {note_id} = useParams<{note_id: string}>();
+    const {folder_name} = useParams<{folder_name: string}>();
     const [note, setNote] = useState< Note | null >(null);
     const [ error, setError ] = useState< string|null >(null)
     const [loading, setLoading] = useState(true);
@@ -52,15 +53,19 @@ export default function SelectedNotePage() {
     if (!note) return <p>Note not found.</p>;
 
   return (
-    <div className="">
-        <div>
-            <h1 className="text-3xl font-semibold">{note.title}</h1>
-            <p>{new Date(note.created_at).toLocaleString()}</p>
-            <article>{note.content}</article>
+    <div className="m-auto lg:w-3/6 flex flex-col h-full">
+        <div className="flex flex-col space-y-2 mt-10">
+            <h1 className="text-3xl font-semibold text-center">{note.title}</h1>
+            <p className="text-sm">{new Date(note.created_at).toLocaleString()}</p>
+            <div
+                className="h-60"
+                dangerouslySetInnerHTML={{__html: note.content}}
+            >
+            </div>
         </div>
         <div className="flex flex-row space-x-2 float-right mt-4">
             <button
-                onClick={(e: React.MouseEvent) => router.push(`/notes/${note_id}/edit`)}
+                onClick={(e: React.MouseEvent) => router.push(`/folders/${folder_name}/${note_id}/edit`)}
                 className="text-white font-semibold px-3 py-1 rounded-sm bg-blue-400
                 hover:bg-blue-500 cursor-pointer"
             >

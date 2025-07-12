@@ -11,10 +11,10 @@ export default function LoginButtons({email}: {email: string | null }) {
     const pathname = usePathname();
     const isLoggedIn: boolean = !!email;
     
-    if (pathname === '/') {
-        console.log("PATHNAME: ", pathname)
-        return null;
-    }
+    // if (pathname === '/') {
+    //     console.log("PATHNAME: ", pathname)
+    //     return null;
+    // }
 
     // Toggle the dropdown visibility
     const toggleDropdown = () => {

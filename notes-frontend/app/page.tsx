@@ -22,7 +22,7 @@ export default async function Home() {
         className="opacity-60 blur-xs hue-rotate-30"
       />
 
-      {/* <Header /> */}
+      <Header />
       
       <main className="flex-1 z-10 p-6 text-black">
         <div className="mx-auto max-w-3xl bg-slate-300/45 shadow-md rounded-md h-96 flex flex-col items-center justify-center gap-y-4">
