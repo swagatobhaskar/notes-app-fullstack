@@ -18,7 +18,7 @@ settings = get_settings()
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
-@router.post("/register", response_model=user_schema.UserOutWithToken)
+@router.post("/register", response_model=user_schema.UserOutWithToken, status_code=status.HTTP_201_CREATED)
 def register(
     response: Response,
     new_user: user_schema.UserCreate,
@@ -96,7 +96,7 @@ def register(
     }
 
 
-@router.post("/login", response_model=user_schema.UserLogin)
+@router.post("/login", response_model=user_schema.UserLogin, status_code=status.HTTP_200_OK)
 def login(
     response: Response,
     # form_data: OAuth2PasswordRequestForm = Depends(), # not using form data
@@ -162,7 +162,7 @@ def login(
     }
 
 
-@router.post("/refresh-token", response_model=user_schema.TokenSchema)
+@router.post("/refresh-token", response_model=user_schema.TokenSchema, status_code=status.HTTP_200_OK)
 def refresh_token(response: Response, request: Request, db: Session = Depends(get_db)):
     # print("COOKIE: ", request.cookies)
     refresh_token_from_cookie = request.cookies.get("refresh_token")

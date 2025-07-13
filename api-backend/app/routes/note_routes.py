@@ -16,7 +16,7 @@ router = APIRouter(prefix="/api/note", tags=["note"])
 # GET ANY /api/note/search-by-tags?tags=work&tags=urgent [&match=any (optional)]
 # match where all the queried tags are present
 # GET ALL /api/note/search-by-tags?tags=work&tags=urgent&match=all
-@router.get('/search-by-tags', response_model=List[note_schema.NoteOut])
+@router.get('/search-by-tags', response_model=List[note_schema.NoteOut], status_code=status.HTTP_200_OK)
 def get_notes_by_tags(
     tags: List[str] = Query(...),
     match: str = Query("any", regex="^(any|all)$"),  # 'any' OR 'all'
@@ -56,7 +56,7 @@ def get_notes_by_tags(
 
 # Get notes by folder for the authenticated user
 # GET /api/note/folder/{folder_id}
-@router.get('/folder/{folder_name}', response_model=List[note_schema.NoteOut])
+@router.get('/folder/{folder_name}', response_model=List[note_schema.NoteOut], status_code=status.HTTP_200_OK)
 def get_notes_by_folder(
     folder_name: str,
     db: Session = Depends(get_db),
@@ -83,7 +83,7 @@ def get_notes_by_folder(
 
 
 # get all notes of the logged in user
-@router.get("/", response_model=list[note_schema.NoteOut])
+@router.get("/", response_model=list[note_schema.NoteOut], status_code=status.HTTP_200_OK)
 def get_all_notes(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     db_user = db.query(User).filter(User.id == current_user.id).first()
     if not db_user:
@@ -113,7 +113,7 @@ def get_note_by_id(
     return db_note
 
 
-@router.patch("/{note_id}", response_model=note_schema.NoteOut)
+@router.patch("/{note_id}", response_model=note_schema.NoteOut, status_code=status.HTTP_200_OK)
 def patch_note_by_id(
     note_id: int,
     updated_note: note_schema.NoteUpdate,
@@ -183,7 +183,7 @@ def delete_note_by_id(
     return  # No content is returned as per 204 status
 
 
-@router.post("/", response_model=note_schema.NoteOut)
+@router.post("/", response_model=note_schema.NoteOut, status_code=status.HTTP_201_CREATED)
 def create_note(
     new_note: note_schema.NoteCreate,
     db: Session = Depends(get_db),

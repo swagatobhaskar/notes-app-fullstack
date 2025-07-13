@@ -13,12 +13,12 @@ settings = get_settings()
 
 router = APIRouter(prefix="/api/user", tags=["user"])
 
-@router.get("/", response_model=user_schema.UserOut)
+@router.get("/", response_model=user_schema.UserOut, status_code=status.HTTP_200_OK)
 def user_profile(current_user: User = Depends(get_current_user)):
     return current_user
 
 
-@router.delete("/", response_model=user_schema.UserDelete)
+@router.delete("/", status_code=status.HTTP_204_NO_CONTENT)
 def delete_user(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
@@ -26,7 +26,7 @@ def delete_user(
     try:
         db.delete(current_user)
         db.commit()
-        return {"message": "Account deleted successfully."}
+        # return {"message": "Account deleted successfully."}
     except IntegrityError:
         # Catch integrity error (e.g., foreign key constraint violation)
         db.rollback()
@@ -44,7 +44,7 @@ def delete_user(
         )
 
 
-@router.patch("/", response_model=user_schema.UpdateProfileResponse)
+@router.patch("/", response_model=user_schema.UpdateProfileResponse, status_code=status.HTTP_200_OK)
 def update_profile(
     updated_user: user_schema.UserPatch,
     db: Session = Depends(get_db),

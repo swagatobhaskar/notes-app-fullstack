@@ -8,7 +8,7 @@ from app.schemas import tag_schema
 
 router = APIRouter(prefix="/api/tag", tags=["tag"])
 
-@router.get('/', response_model=list[tag_schema.TagOut])
+@router.get('/', response_model=list[tag_schema.TagOut], status_code=status.HTTP_200_OK)
 def get_all_tags(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
@@ -17,7 +17,7 @@ def get_all_tags(
     return db_tags
 
 
-@router.get('/{tag_id}', response_model=tag_schema.TagOut)
+@router.get('/{tag_id}', response_model=tag_schema.TagOut, status_code=status.HTTP_200_OK)
 def get_tag_by_id(
     tag_id: int,
     db: Session = Depends(get_db),
@@ -38,7 +38,7 @@ def get_tag_by_id(
     return db_tag
 
 
-@router.post('/', response_model=tag_schema.TagOut)
+@router.post('/', response_model=tag_schema.TagOut, status_code=status.HTTP_201_CREATED)
 def create_tag(
     new_tag: tag_schema.TagCreate,
     db: Session = Depends(get_db),
@@ -65,7 +65,7 @@ def create_tag(
         )
     
     
-@router.patch('/{tag_id}', response_model=tag_schema.TagOut)
+@router.patch('/{tag_id}', response_model=tag_schema.TagOut, status_code=status.HTTP_200_OK)
 def edit_tag_by_id(
     tag_id: int,
     updated_tag: tag_schema.TagUpdate,
@@ -105,7 +105,7 @@ def edit_tag_by_id(
     return db_tag
 
 
-@router.delete('/{tag_id}')
+@router.delete('/{tag_id}', status_code=status.HTTP_204_NO_CONTENT)
 def delete_tag_by_id(
     tag_id: int,
     db: Session = Depends(get_db),
