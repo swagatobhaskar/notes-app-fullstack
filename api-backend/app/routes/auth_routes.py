@@ -18,8 +18,12 @@ settings = get_settings()
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
-@router.post("/register", response_model=user_schema.UserOutWithToken)
-def register(response: Response, new_user: user_schema.UserCreate, db: Session = Depends(get_db)):
+@router.post("/register", response_model=user_schema.UserOutWithToken, status_code=status.HTTP_201_CREATED)
+def register(
+    response: Response,
+    new_user: user_schema.UserCreate,
+    db: Session = Depends(get_db)
+):
     # Check if user already exists
     if db.query(User).filter(User.email == new_user.email).first():
         raise HTTPException(status_code=400, detail="Email already registered!")
@@ -38,10 +42,11 @@ def register(response: Response, new_user: user_schema.UserCreate, db: Session =
         access_token = jwt_config.create_access_token(
             data = {"sub": str(db_user.id)},
             expires_delta = timedelta(minutes=settings.access_token_expire_minutes)
-            )
+        )
+        
         refresh_token = jwt_config.create_refresh_token(
             data = {"sub": str(db_user.id)},
-            expires_delta = timedelta(minutes=settings.refresh_token_expire_days)
+            expires_delta = timedelta(days=settings.refresh_token_expire_days)
         )
     except (JWTError, SQLAlchemyError, Exception) as e:
         # Delete created user or undo any changes if JWT creation fails
@@ -64,7 +69,7 @@ def register(response: Response, new_user: user_schema.UserCreate, db: Session =
         httponly=True,
         secure=True,              # Set to True in production with HTTPS
         samesite="strict",        # or 'lax', depending on your frontend/backend separation
-        path="/refresh-token"     # Limit access to only the refresh-token route
+        # path="/refresh-token"     # Limit access to only the refresh-token route
     )
 
     # CSRF cookie for added CSRF protection
@@ -88,16 +93,16 @@ def register(response: Response, new_user: user_schema.UserCreate, db: Session =
         'access_token': access_token,
         'refresh_token': refresh_token,
         'csrf_token': csrf_token
-        }
+    }
 
 
-@router.post("/login", response_model=user_schema.UserLogin)
-def login(response: Response,
-        #   form_data: OAuth2PasswordRequestForm = Depends(), # not using form data
-        login_data: user_schema.LoginInput,
-        db: Session = Depends(get_db)
-        ):
-    
+@router.post("/login", response_model=user_schema.UserLogin, status_code=status.HTTP_200_OK)
+def login(
+    response: Response,
+    # form_data: OAuth2PasswordRequestForm = Depends(), # not using form data
+    login_data: user_schema.LoginInput,
+    db: Session = Depends(get_db)
+):
     user = db.query(User).filter(User.email == login_data.email).first()
     
     if not user or not security.verify_password(login_data.password, user.hashed_password):
@@ -110,7 +115,7 @@ def login(response: Response,
         )
         refresh_token = jwt_config.create_refresh_token(
             data = {"sub": str(user.id)},
-            expires_delta = timedelta(minutes=settings.refresh_token_expire_days)
+            expires_delta = timedelta(days=settings.refresh_token_expire_days)
         )
     except (JWTError, Exception) as e:
         raise HTTPException(status_code=500, detail="Login failed, Please try again!")
@@ -131,7 +136,7 @@ def login(response: Response,
         httponly=True,
         secure=True,              # Set to True in production with HTTPS
         samesite="strict",        # or 'lax', depending on your frontend/backend separation
-        path="/refresh-token"     # Limit access to only the refresh-token route
+        # path="/refresh-token"     # Limit access to only the refresh-token route
     )
 
     # CSRF cookie for added CSRF protection
@@ -154,13 +159,14 @@ def login(response: Response,
         'refresh_token': refresh_token,
         'token_type': 'bearer',
         'csrf_token': csrf_token,
-        }
+    }
 
 
-@router.post("/refresh-token", response_model=user_schema.TokenSchema)
+@router.post("/refresh-token", response_model=user_schema.TokenSchema, status_code=status.HTTP_200_OK)
 def refresh_token(response: Response, request: Request, db: Session = Depends(get_db)):
-    print("COOKIE: ", request.cookies)
+    # print("COOKIE: ", request.cookies)
     refresh_token_from_cookie = request.cookies.get("refresh_token")
+    
     if not refresh_token_from_cookie:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh token missing")
     
@@ -194,6 +200,5 @@ def refresh_token(response: Response, request: Request, db: Session = Depends(ge
 @router.post('/logout', status_code=status.HTTP_200_OK)
 def logout(response: Response):
     response.delete_cookie(key='access_token', httponly=True, secure=True, samesite='strict')
-    response.delete_cookie(key='refresh_token', httponly=True, secure=True, samesite='strict', path='/refresh_token')
+    response.delete_cookie(key='refresh_token', httponly=True, secure=True, samesite='strict') #, path='/refresh_token')
     return {"message": "Logout successful! Cookies cleared."}
-

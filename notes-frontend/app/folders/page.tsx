@@ -1,11 +1,12 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { faFolderOpen } from "@fortawesome/free-solid-svg-icons"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import Link from "next/link"
 
-import { apiGet } from "@/app/lib/apiFetchHandler"
+import { apiGet, apiPost } from "@/app/lib/apiFetchHandler"
+import NewNoteUnnamedFolder from "../components/new_note_unnamed_folder"
+import { useRouter } from "next/navigation"
+import NewFolderModal from "../components/new_folder_modal"
 
 interface Folder {
     id: number,
@@ -13,52 +14,112 @@ interface Folder {
 }
 
 export default function AllUserCreatedFoldersPage() {
-    const router = useRouter();
-    const [folders, setFolders] = useState<Folder[]>([]);
-    const [error, setError] = useState<string | null>(null);
-    const [loading, setLoading] = useState<boolean>(true);
+    const router = useRouter()
+    const [ showModal, setShowModal ] = useState<boolean>(false);
+    const [ folders, setFolders ] = useState<Folder[]>([]);
+    const [ error, setError ] = useState<string | null>(null);
+    const [ loading, setLoading ] = useState<boolean>(true);
 
-    // fetch all folders for this user
+    const fetchFoldersForCurrentUser = async () => {
+        try {
+            const foldersData = await apiGet<Folder[]>(`${process.env.NEXT_PUBLIC_API_URL}/folder`)
+            setFolders(foldersData)
+        } catch(err: any) {
+            console.error(err)
+            setError(err.message)
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchFoldersForCurrentUser = async () => {
-            try {
-                const foldersData = await apiGet<Folder[]>('http://127.0.0.1:8000/api/folder')
-                setFolders(foldersData)
-            } catch(err: any) {
-                console.error(err)
-                setError(err.message)
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchFoldersForCurrentUser();
     }, [])
 
     if (loading) {
-        return <p>Loading...</p>; // Optionally, a loading spinner or message while data is being fetched
+        return <p>Loading...</p>;
+    }
+
+    const handleNewFolderCreated = (newFolder: Folder) => {
+        setFolders((prev) => [ ...prev, newFolder ])
+    }
+
+    const createUnnamedFolder = async() => {
+        try {
+            const response = await apiPost(`${process.env.NEXT_PUBLIC_API_URL}/folder`, { name: "unnamed" })
+            console.log("RESPONSE UNNAMED", response)
+            if (response.ok) {       // no status code upon success is returned from backend, but the full body
+                // Option 1: re-fetch everything
+                await fetchFoldersForCurrentUser()
+
+                // Option 2: or optimistically add it
+                // setFolders(prev => [...prev, { id: response.id, name: "unnamed" }])
+
+                // Then redirect
+                router.push('/folders/unnamed/new')
+            } else {
+            //     // Try to log response body to see the error
+                const text = await response.text();
+                console.error('Backend did not return ok:', text);
+                throw new Error('Failed to create folder')
+            }
+        } catch (err) {
+            console.error(err)
+        }
     }
 
     return (
-        <div>
-            <h2 className="text-xl font-bold mb-2">Folders</h2>
+        <div className="mt-4">
             {error && <p className="text-red-500">{error}</p>}
+            {/* New Folder Button */}
+            <div className="flex flex-row w-fit align-baseline p-2">
+                <div
+                    // onClick={() => {alert("Modal to Create New Folder")}}
+                    onClick={()=>setShowModal(true)}
+                    title="New Folder"
+                    className="hover:bg-gray-200 my-3 p-3 rounded-md cursor-pointer w-fit"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 10.5v6m3-3H9m4.06-7.19-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
+                    </svg>
+                </div>
+                <NewNoteUnnamedFolder
+                    unnamedFolderExists={folders.some(folder => folder.name === 'unnamed')}
+                    createUnnamedFolder={createUnnamedFolder} //pass callback
+                />
+            </div>
             {folders.length === 0 ? (
-                <p>No folders available.</p>
+                <p className="font-semibold text-lg">No folders available.</p>
             ):(
-                <ul>
+                <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                     {folders.map(folder => (
-                        <li
-                            key={folder.id}
-                            className="mb-1"
-                            onClick={() => {router.push(`/folders/${folder.name}`)}}
-                        >
-                            <span>
-                                <FontAwesomeIcon icon={faFolderOpen} />
-                                <p>{folder.name}</p>
-                            </span>
+                        <li key={folder.id}>
+                            <Link
+                                href={`/folders/${folder.name}`}
+                                className="block cursor-pointer px-2 py-4 shadow hover:bg-gray-200"
+                            >
+                                <div className="flex flex-col items-center w-full">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.3} stroke="currentColor" className="size-24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
+                                    </svg>
+                                    <p
+                                        title={folder.name}
+                                        className="text-center truncate w-full"
+                                    >
+                                        {folder.name}
+                                    </p>
+                                </div>
+                            </Link>
                         </li>
                     ))}
                 </ul>
+            )}
+            {/* New folder modal */}
+            {showModal && (
+                <NewFolderModal
+                    onClose={()=>setShowModal(false)}
+                    onCreated={handleNewFolderCreated}    
+                />
             )}
         </div>
     )

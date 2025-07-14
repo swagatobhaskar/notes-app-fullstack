@@ -10,48 +10,48 @@ from app.schemas import folder_schema
 router = APIRouter(prefix="/api/folder", tags=["folder"])
 
 # Return all folders created by the authenticated user
-@router.get('/', response_model=list[folder_schema.FolderOut])
+@router.get('/', response_model=list[folder_schema.FolderOut], status_code=status.HTTP_200_OK)
 def get_all_Folders(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     db_folders = db.query(Folder).filter(Folder.user_id == current_user.id).all()
     return db_folders
 
 
-@router.get('/{folder_id}', response_model=folder_schema.FolderOut)
+@router.get('/{folder_id}', response_model=folder_schema.FolderOut, status_code=status.HTTP_200_OK)
 def get_folder_by_id(
     folder_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
-    ):
+):
     db_folder = (
         db.query(Folder).filter(
             Folder.id == folder_id,
             Folder.user_id == current_user.id
-            ).first()
-        )
+        ).first()
+    )
     
     if not db_folder:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Folder with id {folder_id} not found!"
-            )
+        )
     
     return db_folder
 
 
 
-@router.post('/', response_model=folder_schema.FolderOut)
+@router.post('/', response_model=folder_schema.FolderOut, status_code=status.HTTP_201_CREATED)
 def create_Folder(
     new_Folder: folder_schema.FolderCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
-    ):
+):
     # Check if folder with this name already exists for the user
     if (
         db.query(Folder).filter(
             Folder.name == new_Folder.name,
             Folder.user_id == current_user.id
-            ).first()
-        ):
+        ).first()
+    ):
         raise HTTPException(status_code=400, detail="Folder already exists!")
     
     try:
@@ -67,13 +67,13 @@ def create_Folder(
             detail="Folder creation failed. Please try again."
         )
     
-@router.patch('/{folder_id}', response_model=folder_schema.FolderOut)
+@router.patch('/{folder_id}', response_model=folder_schema.FolderOut, status_code=status.HTTP_200_OK)
 def edit_Folder_by_id(
     folder_id: int,
     updated_Folder: folder_schema.FolderUpdate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
-    ):
+):
     # Check if folder with the given id exists
     db_folder = db.query(Folder).filter(Folder.id == folder_id, Folder.user_id == current_user.id).first()
     if not db_folder:
@@ -92,12 +92,12 @@ def edit_Folder_by_id(
     return db_folder
 
 
-@router.delete('/{folder_id}')
+@router.delete('/{folder_id}', status_code=status.HTTP_204_NO_CONTENT)
 def delete_Folder_by_id(
     folder_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
-    ):
+):
     db_folder_to_delete = db.query(Folder).filter(Folder.id == folder_id, Folder.user_id == current_user.id).first()
    
     if not db_folder_to_delete:

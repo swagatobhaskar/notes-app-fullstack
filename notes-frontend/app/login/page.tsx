@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { apiGet } from "../lib/apiFetchHandler";
 
 export default function Login() {
     const [email, setEmail] = useState("");
@@ -10,6 +11,23 @@ export default function Login() {
     const [error, setError] = useState('');
     
     const router = useRouter()
+
+    // Check if user is already logged in
+    // forward to some place else
+    useEffect(() => {
+        const checkIfLoggedIn = async () => {
+            const resp = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            if (resp.status !== 401) {
+                router.back()
+            }
+        };
+        checkIfLoggedIn()
+    }, [])
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -37,7 +55,7 @@ export default function Login() {
             }
             // handle successful login here
             console.log("Login Successful!", data);
-            router.push("/notes");
+            router.push("/folders");
             
         } catch (err) {
             if (err instanceof Error) {

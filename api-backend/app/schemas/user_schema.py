@@ -60,9 +60,6 @@ class UserOutWithToken(BaseModel):
     refresh_token: str
     token_type: str
     user: UserOut
-    
-class UserDelete(BaseModel):
-    message: str
 
 class UserPatch(BaseModel):
     fname: Optional[str] = None

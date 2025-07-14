@@ -1,10 +1,11 @@
 "use client"
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 
 import { apiGet } from "@/app/lib/apiFetchHandler";
+import FolderListSidebar from "@/app/components/folder_list_sidebar";
 
 interface Note {
   id: number,
@@ -15,9 +16,9 @@ interface Note {
   updated_at: string
 }
 
-export default function Notes() {
+export default function AllNotesInSelectedFolder() {
 
-  const router = useRouter();
+  const { folder_name } = useParams<{folder_name: string}>()
 
   const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -31,11 +32,11 @@ export default function Notes() {
     if (updated_at !== created_at) {
       return <p>Updated at: {new Date(updated_at).toLocaleString()}</p>
     }
-  } 
+  }
 
   useEffect(() => {
     // Always await or .then() because they return a Promise.
-    apiGet<Note[]>('http://127.0.0.1:8000/api/note')
+    apiGet<Note[]>(`${process.env.NEXT_PUBLIC_API_URL}/note/folder/${folder_name}`)
     .then(setNotes)
     .catch(err => {
       console.error(err)
@@ -48,35 +49,55 @@ export default function Notes() {
   }, [])
 
   if (loading) return <p>Loading...</p>;
-  if (notes.length === 0) return <p>No notes found.</p>;
+  // if (notes.length === 0) return <p className="text-center">No notes found.</p>;
 
   return (
-    <div className="flex flex-col">
-      <div id="new-button" className=" my-4">
-        <Link
-          href={"/notes/new"}
-          className="text-white font-semibold text-xl px-5 py-2.5 rounded-md bg-blue-400 hover:bg-blue-500 float-right"
-        >
-          New
-        </Link>
+    <div className="flex flex-row">
+      {/* side bar component*/}
+      <div className="flex-1/5">
+        <FolderListSidebar current_folder_name={folder_name} />
       </div>
-      <div className="grid md:grid-cols-4 md:grid-rows-3 gap-4 bg-gray-50 p-10">
-        {notes.map((note: Note) => (
-          <div
-            key={note.id}
-            className="flex flex-col space-y-4 w-60 h-52 border-gray-200 rounded-md shadow-md
-              shadow-gray-400 bg-white p-5 overflow-hidden cursor-pointer"
-            onClick={(e:React.MouseEvent) => router.push(`/notes/${note.id}`)}
+      {/* note cards */}
+      <div className="flex-4/5 flex flex-col">
+        <div id="new-button" className=" my-4">
+          <Link
+            href={`/folders/${folder_name}/new`}
+            className="ml-6 px-4 py-2 rounded-md bg-white hover:bg-gray-200 float-left"
           >
-            <p className="font-sans text-2xl flex-2/3 font-semibold">{note.title}</p>
-            <p className="text-sm flex-1/3">{truncateText(note.content)}</p>
-            <div className="text-xs text-gray-500 flex-1/3">
-              <p>Created at: {new Date(note.created_at).toLocaleString()}</p>
-              {/* <p>Updated at: {new Date(note.updated_at).toLocaleString()}</p> */}
-              {showUpdatedAt(note.created_at, note.updated_at)}
-            </div>
+            {/* SVG icon for new note */}
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-8">
+              <path d="M15 4H5V20H19V8H15V4ZM3 2.9918C3 2.44405 3.44749 2 3.9985 2H16L20.9997 7L21 20.9925C21 21.5489 20.5551 22 20.0066 22H3.9934C3.44476 22 3 21.5447 3 21.0082V2.9918ZM11 11V8H13V11H16V13H13V16H11V13H8V11H11Z">
+              </path>
+            </svg>
+          </Link>
+        </div>
+        { notes.length === 0 ? (
+          <div className="flex flex-col space-y-4 items-center">
+            <p className="text-3xl font-semibold">No notes found.</p>
+            <Link href={`/folders/${folder_name}/new`} className="">Write a new note</Link>
           </div>
-        ))}
+          ) : (
+          <ul className="mx-5 grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-6">
+            {notes.map((note: Note) => (
+              <li key={note.id}>
+                <Link
+                  href={`/folders/${folder_name}/${note.id}`}
+                  className="flex flex-col justify-between space-y-4 border border-gray-200 rounded-md shadow-md
+                    shadow-gray-300 bg-white p-5 overflow-hidden cursor-pointer hover:shadow-lg transition
+                    w-full h-30 md:h-40 lg:h-50"
+                >
+                  <p className="font-sans text-2xl flex-2/3 font-semibold truncate">{note.title}</p>
+                  <p className="text-sm flex-1/3">{truncateText(note.content)}</p>
+                  <div className="text-xs text-gray-500 flex-1/3">
+                    <p>Created at: {new Date(note.created_at).toLocaleString()}</p>
+                    {/* <p>Updated at: {new Date(note.updated_at).toLocaleString()}</p> */}
+                    {showUpdatedAt(note.created_at, note.updated_at)}
+                  </div>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );

@@ -19,9 +19,13 @@ export async function apiFetch<T = any>(
     const res = await fetch(input, config)
 
     if (res.status === 401 && retry) {
-        const refreshRes = await fetch('/api/auth/refresh-token', {
+        console.log("RETRY AFTER 401")
+        const refreshRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/refresh-token`, {
             method: 'POST',
             credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json'
+            }
         })
 
         if (refreshRes.ok) {
