@@ -2,20 +2,15 @@
 
 import { apiPost } from "@/app/lib/apiFetchHandler";
 import Link from "next/link";
-import { usePathname, useRouter } from 'next/navigation';
-import { useState } from "react";
+import { useRouter } from 'next/navigation';
+import { useEffect, useState, useRef } from "react";
 
 export default function LoginButtons({email}: {email: string | null }) {
     const router = useRouter();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const pathname = usePathname();
     const isLoggedIn: boolean = !!email;
-    
-    // if (pathname === '/') {
-    //     console.log("PATHNAME: ", pathname)
-    //     return null;
-    // }
-
+    const dropdownRef = useRef<HTMLDivElement>(null)
+  
     // Toggle the dropdown visibility
     const toggleDropdown = () => {
         setIsDropdownOpen((prev) => !prev);
@@ -24,12 +19,27 @@ export default function LoginButtons({email}: {email: string | null }) {
     const handleLogout = async () => {
         console.log("LOGOUT CLICKED!")
         await apiPost(`${process.env.NEXT_PUBLIC_API_URL}/auth/logout`, null)
+        setIsDropdownOpen(false);
         router.push('/')
     }
 
+    // Close on outside click
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setIsDropdownOpen(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.addEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
+
     if (isLoggedIn) {
         return (
-            <div className="relative">
+            <div className="relative" ref={dropdownRef}>
                 <div className="" onClick={toggleDropdown}>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-8">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
