@@ -6,6 +6,7 @@ import Link from "next/link"
 import { apiGet, apiPost } from "@/app/lib/apiFetchHandler"
 import NewNoteUnnamedFolder from "../components/new_note_unnamed_folder"
 import { useRouter } from "next/navigation"
+import NewFolderModal from "../components/new_folder_modal"
 
 interface Folder {
     id: number,
@@ -14,9 +15,10 @@ interface Folder {
 
 export default function AllUserCreatedFoldersPage() {
     const router = useRouter()
-    const [folders, setFolders] = useState<Folder[]>([]);
-    const [error, setError] = useState<string | null>(null);
-    const [loading, setLoading] = useState<boolean>(true);
+    const [ showModal, setShowModal ] = useState<boolean>(false);
+    const [ folders, setFolders ] = useState<Folder[]>([]);
+    const [ error, setError ] = useState<string | null>(null);
+    const [ loading, setLoading ] = useState<boolean>(true);
 
     const fetchFoldersForCurrentUser = async () => {
         try {
@@ -38,25 +40,29 @@ export default function AllUserCreatedFoldersPage() {
         return <p>Loading...</p>;
     }
 
+    const handleNewFolderCreated = (newFolder: Folder) => {
+        setFolders((prev) => [ ...prev, newFolder ])
+    }
+
     const createUnnamedFolder = async() => {
         try {
             const response = await apiPost(`${process.env.NEXT_PUBLIC_API_URL}/folder`, { name: "unnamed" })
-            // console.log("RESPONSE UNNAMED", response)
-            // if (response.ok) {       // no status code upon success is returned from backend, but the full body
+            console.log("RESPONSE UNNAMED", response)
+            if (response.ok) {       // no status code upon success is returned from backend, but the full body
                 // Option 1: re-fetch everything
-            await fetchFoldersForCurrentUser()
+                await fetchFoldersForCurrentUser()
 
                 // Option 2: or optimistically add it
                 // setFolders(prev => [...prev, { id: response.id, name: "unnamed" }])
 
                 // Then redirect
-            router.push('/folders/unnamed/new')
-            // } else {
+                router.push('/folders/unnamed/new')
+            } else {
             //     // Try to log response body to see the error
-            //     const text = await response.text();
-            //     console.error('Backend did not return ok:', text);
-            //     throw new Error('Failed to create folder')
-            // }
+                const text = await response.text();
+                console.error('Backend did not return ok:', text);
+                throw new Error('Failed to create folder')
+            }
         } catch (err) {
             console.error(err)
         }
@@ -68,7 +74,8 @@ export default function AllUserCreatedFoldersPage() {
             {/* New Folder Button */}
             <div className="flex flex-row w-fit align-baseline p-2">
                 <div
-                    onClick={() => {alert("Modal to Create New Folder")}}
+                    // onClick={() => {alert("Modal to Create New Folder")}}
+                    onClick={()=>setShowModal(true)}
                     title="New Folder"
                     className="hover:bg-gray-200 my-3 p-3 rounded-md cursor-pointer w-fit"
                 >
@@ -106,6 +113,13 @@ export default function AllUserCreatedFoldersPage() {
                         </li>
                     ))}
                 </ul>
+            )}
+            {/* New folder modal */}
+            {showModal && (
+                <NewFolderModal
+                    onClose={()=>setShowModal(false)}
+                    onCreated={handleNewFolderCreated}    
+                />
             )}
         </div>
     )
