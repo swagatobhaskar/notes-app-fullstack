@@ -49,12 +49,12 @@ export default function AllNotesInSelectedFolder() {
   }, [])
 
   if (loading) return <p>Loading...</p>;
-  if (notes.length === 0) return <p>No notes found.</p>;
+  // if (notes.length === 0) return <p className="text-center">No notes found.</p>;
 
   return (
     <div className="flex flex-row">
       {/* side bar component*/}
-      <div className="flex-1/5 border-r border-slate-600">
+      <div className="flex-1/5">
         <FolderListSidebar current_folder_name={folder_name} />
       </div>
       {/* note cards */}
@@ -71,26 +71,33 @@ export default function AllNotesInSelectedFolder() {
             </svg>
           </Link>
         </div>
-        <ul className="mx-5 grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-6">
-          {notes.map((note: Note) => (
-            <li key={note.id}>
-              <Link
-                href={`/folders/${folder_name}/${note.id}`}
-                className="flex flex-col justify-between space-y-4 border border-gray-200 rounded-md shadow-md
-                  shadow-gray-300 bg-white p-5 overflow-hidden cursor-pointer hover:shadow-lg transition
-                  w-full h-30 md:h-40 lg:h-50"
-              >
-                <p className="font-sans text-2xl flex-2/3 font-semibold truncate">{note.title}</p>
-                <p className="text-sm flex-1/3">{truncateText(note.content)}</p>
-                <div className="text-xs text-gray-500 flex-1/3">
-                  <p>Created at: {new Date(note.created_at).toLocaleString()}</p>
-                  {/* <p>Updated at: {new Date(note.updated_at).toLocaleString()}</p> */}
-                  {showUpdatedAt(note.created_at, note.updated_at)}
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        { notes.length === 0 ? (
+          <div className="flex flex-col space-y-4 items-center">
+            <p className="text-3xl font-semibold">No notes found.</p>
+            <Link href={`/folders/${folder_name}/new`} className="">Write a new note</Link>
+          </div>
+          ) : (
+          <ul className="mx-5 grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-6">
+            {notes.map((note: Note) => (
+              <li key={note.id}>
+                <Link
+                  href={`/folders/${folder_name}/${note.id}`}
+                  className="flex flex-col justify-between space-y-4 border border-gray-200 rounded-md shadow-md
+                    shadow-gray-300 bg-white p-5 overflow-hidden cursor-pointer hover:shadow-lg transition
+                    w-full h-30 md:h-40 lg:h-50"
+                >
+                  <p className="font-sans text-2xl flex-2/3 font-semibold truncate">{note.title}</p>
+                  <p className="text-sm flex-1/3">{truncateText(note.content)}</p>
+                  <div className="text-xs text-gray-500 flex-1/3">
+                    <p>Created at: {new Date(note.created_at).toLocaleString()}</p>
+                    {/* <p>Updated at: {new Date(note.updated_at).toLocaleString()}</p> */}
+                    {showUpdatedAt(note.created_at, note.updated_at)}
+                  </div>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );

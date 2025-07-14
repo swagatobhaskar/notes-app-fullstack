@@ -1,19 +1,16 @@
-// import Footer from "@/app/components/footer";
-// import Header from "@/app/components/header";
-
 import Footer from "@/app/components/footer";
 import Header from "@/app/components/header";
 
-export default function IntoTheFolderLayout({
+export default async function IntoTheFolderLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <div className="relative flex flex-col min-h-screen w-full">
-      <Header />
+      {/* <Header /> */}
       {children}
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 }
