@@ -1,8 +1,10 @@
 "use client"
 
-import { apiDelete, apiGet } from "@/app/lib/apiFetchHandler";
 import { useRouter, useParams } from "next/navigation"
 import React, { useState, useEffect } from "react"
+
+import NoteRemoveModal from "@/app/components/note_remove_modal";
+import { apiDelete, apiGet } from "@/app/lib/apiFetchHandler";
 
 interface Note {
     id: number,
@@ -20,7 +22,7 @@ export default function SelectedNotePage() {
     const [note, setNote] = useState< Note | null >(null);
     const [ error, setError ] = useState< string|null >(null)
     const [loading, setLoading] = useState(true);
-    const [ deleteSuccess, setDeleteSuccess ] = useState<boolean>(false)
+    const [ showRemoveModal, setShowRemoveModal ] = useState<boolean>(false)
 
     useEffect(() => {
         const fetchNote = async () => {
@@ -41,7 +43,7 @@ export default function SelectedNotePage() {
     const handleRemoveNote = async (e: React.MouseEvent) => {
         try {
             await apiDelete(`${process.env.NEXT_PUBLIC_API_URL}/note/${note_id}`)
-            setDeleteSuccess(true)
+            setShowRemoveModal(false);  // Close modal on success
             router.back()
         } catch(err: any) {
             console.error(err)
@@ -76,7 +78,7 @@ export default function SelectedNotePage() {
                 {/* Edit */}
             </button>
             <button
-                onClick={(e: React.MouseEvent) => handleRemoveNote(e)}
+                onClick={()=>setShowRemoveModal(true)}
                 className="text-white font-semibold px-3 py-1 rounded-sm bg-red-400
                 hover:bg-red-500 cursor-pointer"
             >
@@ -87,6 +89,12 @@ export default function SelectedNotePage() {
                 </svg>
             </button>
         </div>
+        {showRemoveModal && (
+            <NoteRemoveModal
+                onClose={()=>setShowRemoveModal(false)}
+                handleRemoveNote={handleRemoveNote}
+            />
+        )}
     </div>
   );
 }
