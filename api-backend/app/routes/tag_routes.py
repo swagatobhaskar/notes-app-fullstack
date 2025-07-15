@@ -2,11 +2,11 @@ from fastapi import HTTPException, Request, Depends, APIRouter, Query, Response,
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 
-from app.dependencies import get_db, get_current_user
+from app.dependencies import get_db, get_current_user, verify_csrf
 from app.models import Tag, User
 from app.schemas import tag_schema
 
-router = APIRouter(prefix="/api/tag", tags=["tag"])
+router = APIRouter(prefix="/api/tag", tags=["tag"], dependencies=[Depends(verify_csrf)])
 
 @router.get('/', response_model=list[tag_schema.TagOut], status_code=status.HTTP_200_OK)
 def get_all_tags(

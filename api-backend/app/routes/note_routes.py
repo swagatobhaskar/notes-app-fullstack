@@ -5,11 +5,11 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from sqlalchemy import func
 
-from app.dependencies import get_db, get_current_user
+from app.dependencies import get_db, get_current_user, verify_csrf
 from app.models import User, Note, Tag, Folder
 from app.schemas import note_schema
 
-router = APIRouter(prefix="/api/note", tags=["note"])
+router = APIRouter(prefix="/api/note", tags=["note"], dependencies=[Depends(verify_csrf)])
 
 
 # match where any tag is present
