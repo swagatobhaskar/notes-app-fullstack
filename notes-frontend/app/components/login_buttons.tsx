@@ -33,7 +33,7 @@ export default function LoginButtons({email}: {email: string | null }) {
 
         document.addEventListener("mousedown", handleClickOutside);
         return () => {
-            document.addEventListener("mousedown", handleClickOutside);
+            document.removeEventListener("mousedown", handleClickOutside);
         };
     }, []);
 
@@ -57,7 +57,7 @@ export default function LoginButtons({email}: {email: string | null }) {
                         >
                             Log Out
                         </p>
-                        <p className="text-black/70 text-sm py-2">{email}</p>
+                        <Link href={'/user'} className="text-black/70 text-sm py-2">{email}</Link>
                     </div>
                 )}
             </div>
