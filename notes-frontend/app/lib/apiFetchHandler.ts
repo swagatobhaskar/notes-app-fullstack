@@ -1,20 +1,29 @@
-// import { useRouter } from "next/navigation"
 
 export async function apiFetch<T = any>(
     input: RequestInfo,
     init: RequestInit = {},
     retry = true
 ): Promise<T> {
+
+    let csrfTokenFromCookie: string | undefined;
+    
+    if (typeof window !== 'undefined') {
+        // Runs in the browser: parse document.cookie
+        const match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]*)/);
+        csrfTokenFromCookie = match ? decodeURIComponent(match[1]) : undefined;
+    }
+
     const config: RequestInit = {
         ...init,
         credentials: 'include',
         headers: {
-            'Content-Type': 'application/json',
             ...(init.headers || {}),
+            'Content-Type': 'application/json',
+            ...(csrfTokenFromCookie && { 'X-CSRF-Token': csrfTokenFromCookie }),
         },
     }
 
-    // const router = useRouter()
+    console.log("CLIENT CSRF: ", csrfTokenFromCookie);
 
     const res = await fetch(input, config)
 
