@@ -289,7 +289,8 @@ const Tiptap = ({content, onchange}) => {
                             <option
                                 key={level}
                                 value={level}
-                                className={editor.isActive('heading', {level: {level}} ? 'bg-gray-100': 'rte_toolbar_btn')}
+                                // className={editor.isActive('heading', {level: {level}} ? 'bg-gray-100': 'rte_toolbar_btn')}
+                                className={editor.isActive('heading', {level}) ? 'bg-gray-100': 'rte_toolbar_btn'}
                             >
                                 H{level}
                             </option>
