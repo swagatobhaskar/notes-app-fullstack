@@ -1,10 +1,26 @@
 import Image from "next/image";
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 import Header from "./components/header";
 import Footer from "./components/footer";
 
 export default async function Home() {
+
+  const cookieStore = cookies()
+
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user`, {
+    headers: {
+      Cookie: (await cookieStore).toString(),
+    },
+    credentials: 'include',
+    cache: 'no-store'
+  })
+
+  if (res.ok) {
+    redirect('/folders')
+  }
 
   return (
     <div className="relative flex flex-col min-h-screen">

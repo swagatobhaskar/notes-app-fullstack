@@ -1,17 +1,40 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
-export default function Register() {
-    const [email, setEmail] = useState("");
+export default function RegistrationFormComponent() {
+    const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState("");
     const [retypePassword, setRetypePassword] = useState("");
     const [isMatch, setIsMatch] = useState(false);
     const [error, setError] = useState('');
     
     const router = useRouter()
+
+    // It's handled in the parent Server component
+    // Check if the user is already logged in
+    // useEffect(() => {
+    //     const checkLoginStatus = async () => {
+    //         try {
+    //             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user`, {
+    //                 method: 'GET',
+    //                 credentials: 'include', // Include cookies if necessary
+    //             });
+
+    //             if (response.ok) {
+    //                 // If the user is logged in, redirect them to `/folders`
+    //                 router.push("/folders");
+    //             }
+    //         } catch (err) {
+    //             // Handle the error (if the API call fails)
+    //             console.error('Error checking login status', err);
+    //         }
+    //     };
+
+    //     checkLoginStatus();
+    // }, [router]); // router = useRouter()
 
     useEffect(() => {
         if (password && retypePassword) {
@@ -35,7 +58,7 @@ export default function Register() {
         const body = {email, password};
 
         try {
-            const response = await fetch("http://127.0.0.1:8000/api/auth/register", {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/register`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -120,4 +143,4 @@ export default function Register() {
                 </p>
         </div>
     );
-};
+}

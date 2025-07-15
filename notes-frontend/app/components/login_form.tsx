@@ -1,39 +1,25 @@
-'use client';
+'use client'
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { apiGet } from "../lib/apiFetchHandler";
 
-export default function Login() {
+export default function LoginFormComponent() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState('');
     
     const router = useRouter()
 
+    // It's handled in the parent Server component
     // Check if user is already logged in
     // forward to some place else
-    useEffect(() => {
-        const checkIfLoggedIn = async () => {
-            const resp = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-            if (resp.status !== 401) {
-                router.back()
-            }
-        };
-        checkIfLoggedIn()
-    }, [])
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
         try {
-            const response = await fetch("http://127.0.0.1:8000/api/auth/login", {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -108,4 +94,4 @@ export default function Login() {
                 </p>
         </div>
     );
-};
+}
