@@ -1,17 +1,19 @@
+import { getCookie } from "./cookies";
 
-export async function apiFetch<T = any>(
+export async function apiFetch<T = any>(  // still not clear whether it runs on the server or client? why async?
     input: RequestInfo,
     init: RequestInit = {},
     retry = true
 ): Promise<T> {
 
-    let csrfTokenFromCookie: string | undefined;
-    
-    if (typeof window !== 'undefined') {
-        // Runs in the browser: parse document.cookie
-        const match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]*)/);
-        csrfTokenFromCookie = match ? decodeURIComponent(match[1]) : undefined;
-    }
+    // let csrfTokenFromCookie: string | undefined;
+    // if (typeof window !== 'undefined') {
+    //     // Runs in the browser: parse document.cookie
+    //     const match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]*)/);
+    //     csrfTokenFromCookie = match ? decodeURIComponent(match[1]) : undefined;
+    // }
+
+    const csrfToken = getCookie('csrf_token');
 
     const config: RequestInit = {
         ...init,
@@ -19,16 +21,16 @@ export async function apiFetch<T = any>(
         headers: {
             ...(init.headers || {}),
             'Content-Type': 'application/json',
-            ...(csrfTokenFromCookie && { 'X-CSRF-Token': csrfTokenFromCookie }),
+            ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {}),
         },
     }
 
-    console.log("CLIENT CSRF: ", csrfTokenFromCookie);
+    // console.log("CLIENT CSRF: ", csrfToken);
 
     const res = await fetch(input, config)
 
     if (res.status === 401 && retry) {
-        console.log("RETRY AFTER 401")
+        // console.log("RETRY AFTER 401.")
         const refreshRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/refresh-token`, {
             method: 'POST',
             credentials: 'include',
