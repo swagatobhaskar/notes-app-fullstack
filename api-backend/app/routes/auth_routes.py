@@ -75,7 +75,7 @@ def register(
         secure=True,              # Set to True in production with HTTPS
         # samesite="strict",        # or 'lax', depending on your frontend/backend separation
         samesite="none",
-        path="/refresh-token"     # Limit access to only the refresh-token route
+        path="/api/auth/refresh-token"     # Limit access to only the refresh-token route
     )
 
     # CSRF cookie for added CSRF protection
@@ -145,7 +145,7 @@ def login(
         secure=True,              # Set to True in production with HTTPS
         # samesite="strict",        # or 'lax', depending on your frontend/backend separation
         samesite="none",
-        path="/refresh-token"     # Limit access to only the refresh-token route
+        path="/api/auth/refresh-token"     # Limit access to only the refresh-token route
     )
 
     # CSRF cookie for added CSRF protection
