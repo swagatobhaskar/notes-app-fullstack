@@ -73,11 +73,8 @@ def get_notes_by_folder(
         .all()
     )
     
-    if not notes_by_folder:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No Note found in this folder"
-        )
+    # I think, It shouldn't be an exception when no note is found
+    # Simply, return empty list/array
     
     return notes_by_folder
 
