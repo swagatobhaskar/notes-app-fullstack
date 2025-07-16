@@ -5,11 +5,11 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from sqlalchemy import func
 
-from app.dependencies import get_db, get_current_user
+from app.dependencies import get_db, get_current_user, verify_csrf
 from app.models import User, Note, Tag, Folder
 from app.schemas import note_schema
 
-router = APIRouter(prefix="/api/note", tags=["note"])
+router = APIRouter(prefix="/api/note", tags=["note"], dependencies=[Depends(verify_csrf)])
 
 
 # match where any tag is present
@@ -73,11 +73,8 @@ def get_notes_by_folder(
         .all()
     )
     
-    if not notes_by_folder:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No Note found in this folder"
-        )
+    # I think, It shouldn't be an exception when no note is found
+    # Simply, return empty list/array
     
     return notes_by_folder
 

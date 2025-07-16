@@ -59,17 +59,23 @@ def register(
         value=access_token,
         httponly=True,
         secure=True,              # Set to True in production with HTTPS
-        samesite="strict",        # or 'lax', depending on your frontend/backend separation
-        # path="/refresh-token"     # Limit access to only the refresh-token route
+        # samesite="strict",        # or 'lax', depending on your frontend/backend separation
+        samesite="none",
+        path="/"                # Limit access to only the refresh-token route
     )
+    
+    # samesite="strict", is NOT practical if your frontend and backend are on different subdomains.
+    # SameSite=Strict is the most secure if your frontend & backend are on the same origin.
+    # SameSite=None is required for true cross-origin cookie usage.
     
     response.set_cookie(
         key="refresh_token",
         value=refresh_token,
         httponly=True,
         secure=True,              # Set to True in production with HTTPS
-        samesite="strict",        # or 'lax', depending on your frontend/backend separation
-        # path="/refresh-token"     # Limit access to only the refresh-token route
+        # samesite="strict",        # or 'lax', depending on your frontend/backend separation
+        samesite="none",
+        path="/api/auth/refresh-token"     # Limit access to only the refresh-token route
     )
 
     # CSRF cookie for added CSRF protection
@@ -80,7 +86,8 @@ def register(
         value=csrf_token,
         httponly=False,  # Must be readable by JS
         secure=True,
-        samesite="strict"
+        # samesite="strict",
+        samesite="none",
     )
 
     # Frontend must send this in a custom header on requests:
@@ -126,8 +133,9 @@ def login(
         value=access_token,
         httponly=True,
         secure=True,              # Set to True in production with HTTPS
-        samesite="strict",        # or 'lax', depending on your frontend/backend separation
-        # path="/refresh-token"     # Limit access to only the refresh-token route
+        # samesite="strict",        # or 'lax', depending on your frontend/backend separation
+        samesite="none",
+        path="/"
     )
 
     response.set_cookie(
@@ -135,8 +143,9 @@ def login(
         value=refresh_token,
         httponly=True,
         secure=True,              # Set to True in production with HTTPS
-        samesite="strict",        # or 'lax', depending on your frontend/backend separation
-        # path="/refresh-token"     # Limit access to only the refresh-token route
+        # samesite="strict",        # or 'lax', depending on your frontend/backend separation
+        samesite="none",
+        path="/api/auth/refresh-token"     # Limit access to only the refresh-token route
     )
 
     # CSRF cookie for added CSRF protection
@@ -147,7 +156,8 @@ def login(
         value=csrf_token,
         httponly=False,  # Must be readable by JS
         secure=True,
-        samesite="strict"
+        # samesite="strict"
+        samesite="none"
     )
 
     # Frontend must send this in a custom header on requests:
@@ -188,8 +198,9 @@ def refresh_token(response: Response, request: Request, db: Session = Depends(ge
             value=access_token,
             httponly=True,
             secure=True,              # Set to True in production with HTTPS
-            samesite="strict",        # or 'lax', depending on your frontend/backend separation
-            # path="/refresh-token"     # Limit access to only the refresh-token route
+            # samesite="strict",        # or 'lax', depending on your frontend/backend separation
+            samesite="none",
+            path="/"     # Limit access to only the refresh-token route
         )
         return {"access_token": access_token, "token_type": "bearer"}
     

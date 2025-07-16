@@ -3,11 +3,11 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from typing import List
 
-from app.dependencies import get_db, get_current_user
+from app.dependencies import get_db, get_current_user, verify_csrf
 from app.models import Folder, User
 from app.schemas import folder_schema
 
-router = APIRouter(prefix="/api/folder", tags=["folder"])
+router = APIRouter(prefix="/api/folder", tags=["folder"], dependencies=[Depends(verify_csrf)])
 
 # Return all folders created by the authenticated user
 @router.get('/', response_model=list[folder_schema.FolderOut], status_code=status.HTTP_200_OK)

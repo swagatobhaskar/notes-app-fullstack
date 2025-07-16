@@ -3,7 +3,7 @@ from fastapi import HTTPException, Request, Depends, APIRouter, Query, status
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 
-from app.dependencies import get_db, get_current_user
+from app.dependencies import get_db, get_current_user, verify_csrf
 from app.models import User
 from app.schemas import user_schema
 from app.utils import security
@@ -11,10 +11,21 @@ from app.config import get_settings
 
 settings = get_settings()
 
-router = APIRouter(prefix="/api/user", tags=["user"])
+router = APIRouter(prefix="/api/user", tags=["user"], dependencies=[Depends(verify_csrf)])
 
 @router.get("/", response_model=user_schema.UserOut, status_code=status.HTTP_200_OK)
-def user_profile(current_user: User = Depends(get_current_user)):
+async def user_profile(current_user: User = Depends(get_current_user)): # request: Request, 
+    # print("Headers at /api/user : ", request.headers)
+    # query_params = request.query_params
+    # print("COOKIES at /api/user :", request.cookies)
+    # body = await request.json() if request.method == "POST" else None
+    # return {
+    #     "current_user": current_user,
+    #     "headers": headers,
+    #     "query_params": query_params,
+    #     "cookies": cookies,
+    #     "body": body,
+    # }
     return current_user
 
 

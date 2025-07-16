@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useRef } from "react";
 
-export default function LoginButtons({email}: {email: string | null }) {
+export default function HeaderLoginButtons({email}: {email: string | null }) {
     const router = useRouter();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const isLoggedIn: boolean = !!email;

@@ -7,10 +7,12 @@ import RegistrationFormComponent from "@/app/components/registration_form";
 
 export default async function RegisterPage() {
     const cookieStore = cookies();
-    
+    const csrfToken = (await cookieStore).get("csrf_token")?.value
+
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user`, {
         headers: {
             Cookie: (await cookieStore).toString(),
+            ...( csrfToken ? {'X-CSRF-Token': csrfToken} : {})
         },
         // This disables Next's cache so the request always goes to the backend
         cache: 'no-store',
@@ -20,7 +22,6 @@ export default async function RegisterPage() {
 
     if (res.ok) {
         // User is logged in → redirect them away!
-        // console.log("SERVER REDIRECT FROM /register")
         redirect('/folders')
     }
 
