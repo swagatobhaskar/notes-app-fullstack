@@ -46,16 +46,18 @@ def get_current_user(token: str = Depends(get_token_from_cookie), db: Session = 
 
 
 def verify_csrf(request: Request):
+    # print("verify_csrf- headers: ", request.headers)
     csrf_cookie = request.cookies.get('csrf_token')
     csrf_header = request.headers.get('X-CSRF-Token')
-    # print(f"CSRF HEADER: {csrf_header} | CSRF COOKIE: {csrf_cookie}")
+    # print(f"CSRF HEADER: {csrf_header} | CSRF COOKIE: {csrf_cookie} | [{csrf_header == csrf_cookie}]")
+    
     if not csrf_cookie or not csrf_header:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid CSRF token")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="CSRF token not found!")
 
     if csrf_cookie != csrf_header:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Invalid CSRF token!"
+            detail="Invalid CSRF token! Value does not match with X-CSRF-Header!"
         )
 
 #
