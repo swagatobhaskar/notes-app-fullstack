@@ -9,10 +9,12 @@ import Footer from "./components/footer";
 export default async function Home() {
 
   const cookieStore = cookies()
-
+  const csrfToken = (await cookieStore).get('csrf_token')?.value
+  
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user`, {
     headers: {
       Cookie: (await cookieStore).toString(),
+      ...( csrfToken ? {'X-CSRF-Token': csrfToken} : {})
     },
     credentials: 'include',
     cache: 'no-store'
