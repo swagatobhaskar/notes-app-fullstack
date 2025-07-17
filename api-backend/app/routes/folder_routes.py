@@ -4,7 +4,7 @@ from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from typing import List
 
 from app.dependencies import get_db, get_current_user, verify_csrf
-from app.models import Folder, User
+from app.models import Folder, Note, User
 from app.schemas import folder_schema
 
 router = APIRouter(prefix="/api/folder", tags=["folder"], dependencies=[Depends(verify_csrf)])
@@ -102,6 +102,13 @@ def delete_Folder_by_id(
    
     if not db_folder_to_delete:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Folder with id {folder_id} not found!")
+    
+    # Do not delete if the folder contains notes
+    if db.query(Note).filter(Note.folder_id == folder_id, Note.user_id == current_user.id).count() > 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot delete this folder because it contains notes."
+        )
 
     try:
         db.delete(db_folder_to_delete)
