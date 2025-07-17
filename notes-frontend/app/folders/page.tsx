@@ -19,6 +19,7 @@ export default function AllUserCreatedFoldersPage() {
     const [ folders, setFolders ] = useState<Folder[]>([]);
     const [ error, setError ] = useState<string | null>(null);
     const [ loading, setLoading ] = useState<boolean>(true);
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
     const fetchFoldersForCurrentUser = async () => {
         try {
@@ -33,7 +34,17 @@ export default function AllUserCreatedFoldersPage() {
     };
 
     useEffect(() => {
-        fetchFoldersForCurrentUser();
+        const initialize = async () => {
+            try {
+                await apiGet(`${process.env.NEXT_PUBLIC_API_URL}/user`);
+                setIsAuthenticated(true);
+                await fetchFoldersForCurrentUser();
+            } catch (err) {
+                setIsAuthenticated(false);
+                setLoading(false);   // Prevent infinite loading
+            }
+        };
+        initialize();
     }, [])
 
     if (loading) {
@@ -47,7 +58,7 @@ export default function AllUserCreatedFoldersPage() {
     const createUnnamedFolder = async() => {
         try {
             const response = await apiPost(`${process.env.NEXT_PUBLIC_API_URL}/folder`, { name: "unnamed" })
-            console.log("RESPONSE UNNAMED", response)
+            
             if (response.ok) {       // no status code upon success is returned from backend, but the full body
                 // Option 1: re-fetch everything
                 await fetchFoldersForCurrentUser()
@@ -72,22 +83,25 @@ export default function AllUserCreatedFoldersPage() {
         <div className="mt-4">
             {error && <p className="text-red-500">{error}</p>}
             {/* New Folder Button */}
-            <div className="flex flex-row w-fit align-baseline p-2">
-                <div
-                    // onClick={() => {alert("Modal to Create New Folder")}}
-                    onClick={()=>setShowModal(true)}
-                    title="New Folder"
-                    className="hover:bg-gray-200 my-3 p-3 rounded-md cursor-pointer w-fit"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 10.5v6m3-3H9m4.06-7.19-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
-                    </svg>
+            { isAuthenticated ? (
+                <div className="flex flex-row w-fit align-baseline p-2">
+                    <div
+                        // onClick={() => {alert("Modal to Create New Folder")}}
+                        onClick={()=>setShowModal(true)}
+                        title="New Folder"
+                        className="hover:bg-gray-200 my-3 p-3 rounded-md cursor-pointer w-fit"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 10.5v6m3-3H9m4.06-7.19-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
+                        </svg>
+                    </div>
+                    <NewNoteUnnamedFolder
+                        unnamedFolderExists={folders.some(folder => folder.name === 'unnamed')}
+                        createUnnamedFolder={createUnnamedFolder} //pass callback
+                    />
                 </div>
-                <NewNoteUnnamedFolder
-                    unnamedFolderExists={folders.some(folder => folder.name === 'unnamed')}
-                    createUnnamedFolder={createUnnamedFolder} //pass callback
-                />
-            </div>
+            ) : (<p>Please Log in or sign up</p>)}
+            
             {folders.length === 0 ? (
                 <p className="font-semibold text-lg">No folders available.</p>
             ):(
