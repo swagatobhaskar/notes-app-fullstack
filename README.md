@@ -1,17 +1,22 @@
-## Notes Web App.
+# Full-Stack Notes App
+Made with **FastAPI v0.115.12** and **Next.js v15.3.2**, with **Tiptap v2.12.0** Rich Text Editor.
 
-"email": "john.doe@example.net",
-"password": "aBcD78%JoHn@"
+### API Documentation at: `http://127.0.0.1:8000/docs`
+### Next.js home page: `http://127.0.0.1:3000`
 
-"email": "jason.duval@lol.idk",
-"password": "12345!AbCdE#hUH"
+## Features
+- Multi-tenant
+- Folders to organize notes
+- JWT authentication
+- CSRF validation (for samesite="none")
 
-"email": "carl.johnson@lol.idk",
-"password": "12345!cJinAnDrEaS#"
+## Sample users:
 
-"email": "sweet.johnson@lol.idk",
-"password": "12345!SJinAnDrEaS#"
-
-"email": "catalina@lol.idk",
-"password": "kata12345!SJinAnDrEaS#"
+|| Email | Password |
+|----|:-------:|----------|
+|1.|john.doe@example.net| aBcD78%JoHn@|
+|2.|jason.duval@lol.idk|12345!AbCdE#hUH|
+|3.|carl.johnson@lol.idk|12345!cJinAnDrEaS#|
+|4.|sweet.johnson@lol.idk|12345!SJinAnDrEaS#|
+|5.|catalina@lol.idk|kata12345!SJinAnDrEaS#|
 
