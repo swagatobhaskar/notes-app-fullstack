@@ -1,6 +1,6 @@
 import { getCookie } from "./cookies";
 
-export async function apiFetch<T = any>(  // still not clear whether it runs on the server or client? why async?
+export async function apiFetch<T = unknown>(  // still not clear whether it runs on the server or client? why async?
     input: RequestInfo,
     init: RequestInit = {},
     retry = true
@@ -48,7 +48,8 @@ export async function apiFetch<T = any>(  // still not clear whether it runs on 
     }
 
     if (!res.ok) {
-        const error = await res.json().catch(() => ({}))
+        // const error = await res.json().catch(() => ({}))
+        const error: { detail?: string } = await res.json().catch(() => ({}))
         throw new Error(error.detail || 'Request Failed')
     }
 
@@ -56,10 +57,10 @@ export async function apiFetch<T = any>(  // still not clear whether it runs on 
 }
 
 // GET
-export const apiGet = <T = any>(url: string, init: RequestInit = {}) => apiFetch<T>(url, { ...init, method: 'GET' })
+export const apiGet = <T = unknown>(url: string, init: RequestInit = {}) => apiFetch<T>(url, { ...init, method: 'GET' })
 
 // POST
-export const apiPost = <T= any>(url: string, body: any, init: RequestInit = {}) => 
+export const apiPost = <T = unknown>(url: string, body: Record<string, unknown>, init: RequestInit = {}) => 
     apiFetch<T>(url, {
         ...init,
         method: 'POST',
@@ -67,7 +68,7 @@ export const apiPost = <T= any>(url: string, body: any, init: RequestInit = {}) 
     })
 
 // PATCH
-export const apiPatch = <T= any>(url: string, body: any, init: RequestInit = {}) => 
+export const apiPatch = <T = unknown>(url: string, body: Record<string, unknown>, init: RequestInit = {}) =>    // body: any
     apiFetch<T>(url, {
         ...init,
         method: 'PATCH',
@@ -75,5 +76,5 @@ export const apiPatch = <T= any>(url: string, body: any, init: RequestInit = {})
     })
 
 // DELETE
-export const apiDelete = <T = any>(url: string, init: RequestInit = {}) => 
+export const apiDelete = <T = unknown>(url: string, init: RequestInit = {}) => 
     apiFetch<T>(url, { ...init, method: 'DELETE' })

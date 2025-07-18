@@ -45,11 +45,13 @@ export default function AllNotesInSelectedFolder() {
     .finally(() => {
       setLoading(false);
     })
-    
-  }, [])
+  }, [folder_name])
+  // }, [])  // Warning: React Hook useEffect has a missing dependency: 'folder_name'. Either include it or remove the dependency array.
 
   if (loading) return <p>Loading...</p>;
   // if (notes.length === 0) return <p className="text-center">No notes found.</p>;
+
+  if (error) return <p>{error}</p>
 
   return (
     <div className="flex flex-row">

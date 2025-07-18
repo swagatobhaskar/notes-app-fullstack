@@ -5,6 +5,16 @@ import React, { useState } from "react"
 
 import Tiptap from "@/app/components/Tiptap";
 import { apiPost } from "@/app/lib/apiFetchHandler";
+import { getErrorMessage } from "@/app/lib/errors";
+
+interface Note {
+    id: number,
+    title: string,
+    content: string,
+    author: string,
+    created_at: string,
+    updated_at: string,
+}
 
 export default function NewNote() {
 
@@ -27,17 +37,17 @@ export default function NewNote() {
 
         e.preventDefault();
         try {
-            const response = await apiPost<any>(
+            const response = await apiPost<Note>(
                 `${process.env.NEXT_PUBLIC_API_URL}/note`,
                 formData
             )
-            if (!response.ok) throw new Error("Failed to save!");
-            const {id} = await response.json()
-            const note_id = id
+            // if (!response.ok) throw new Error("Failed to save!");
+            // const {id} = await response.id
+            const note_id = response.id
             router.push(`folders/${folder_name}/${note_id}`) // need folder name
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error(err);
-            setError(err)
+            setError(getErrorMessage(err))
         }
     }
 
@@ -47,6 +57,7 @@ export default function NewNote() {
     }
 
     // periodically save as draft or to localStorage
+    if (error) return <p>{error}</p>
 
     return (
         <div className="mx-auto min-w-[60vw] max-w-[60vw]">

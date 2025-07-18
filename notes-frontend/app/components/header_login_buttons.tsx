@@ -18,7 +18,7 @@ export default function HeaderLoginButtons({email}: {email: string | null }) {
 
     const handleLogout = async () => {
         console.log("LOGOUT CLICKED!")
-        await apiPost(`${process.env.NEXT_PUBLIC_API_URL}/auth/logout`, null)
+        await apiPost(`${process.env.NEXT_PUBLIC_API_URL}/auth/logout`, {})  // /logout don't need body.
         setIsDropdownOpen(false);
         router.push('/')
     }

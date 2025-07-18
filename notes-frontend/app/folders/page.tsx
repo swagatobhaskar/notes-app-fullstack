@@ -7,6 +7,7 @@ import { apiGet, apiPost } from "@/app/lib/apiFetchHandler"
 import NewNoteUnnamedFolder from "../components/new_note_unnamed_folder"
 import { useRouter } from "next/navigation"
 import NewFolderModal from "../components/new_folder_modal"
+import { getErrorMessage } from "../lib/errors"
 
 interface Folder {
     id: number,
@@ -25,9 +26,9 @@ export default function AllUserCreatedFoldersPage() {
         try {
             const foldersData = await apiGet<Folder[]>(`${process.env.NEXT_PUBLIC_API_URL}/folder`)
             setFolders(foldersData)
-        } catch(err: any) {
+        } catch(err: unknown) {
             console.error(err)
-            setError(err.message)
+            setError(getErrorMessage(err))
         } finally {
             setLoading(false);
         }
@@ -39,7 +40,8 @@ export default function AllUserCreatedFoldersPage() {
                 await apiGet(`${process.env.NEXT_PUBLIC_API_URL}/user`);
                 setIsAuthenticated(true);
                 await fetchFoldersForCurrentUser();
-            } catch (err) {
+            } catch (err: unknown) {
+                setError(getErrorMessage(err))
                 setIsAuthenticated(false);
                 setLoading(false);   // Prevent infinite loading
             }
@@ -57,9 +59,9 @@ export default function AllUserCreatedFoldersPage() {
 
     const createUnnamedFolder = async() => {
         try {
-            const response = await apiPost(`${process.env.NEXT_PUBLIC_API_URL}/folder`, { name: "unnamed" })
+            const response = await apiPost<Folder>(`${process.env.NEXT_PUBLIC_API_URL}/folder`, { name: "unnamed" })
             
-            if (response.ok) {       // no status code upon success is returned from backend, but the full body
+            if (response) {       // no status code upon success is returned from backend, but the full body
                 // Option 1: re-fetch everything
                 await fetchFoldersForCurrentUser()
 
@@ -69,13 +71,13 @@ export default function AllUserCreatedFoldersPage() {
                 // Then redirect
                 router.push('/folders/unnamed/new')
             } else {
-            //     // Try to log response body to see the error
-                const text = await response.text();
-                console.error('Backend did not return ok:', text);
+                // Try to log response body to see the error
+                console.error('Backend did not return ok:', response);
                 throw new Error('Failed to create folder')
             }
-        } catch (err) {
+        } catch (err: unknown) {
             console.error(err)
+            setError(getErrorMessage(err))
         }
     }
 

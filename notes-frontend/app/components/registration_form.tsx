@@ -68,7 +68,7 @@ export default function RegistrationFormComponent() {
                 }
             )
 
-            const data = await response.json();
+            await response.json();
             // console.log("DATA:", data);
 
             if (!response.ok) {
