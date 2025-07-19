@@ -1,6 +1,15 @@
 # Full-Stack Notes App
 Made with **FastAPI v0.115.12** and **Next.js v15.3.2**, with **Tiptap v2.12.0** Rich Text Editor.
 
+Run FastAPI in production with Uvicorn: `uvicorn app.main:app --host 0.0.0.0 --port 80`
+Use a different port, such as, 80001m or use `sudo`, if you get the following error:
+> INFO:     Started server process [63149] <br/>
+> INFO:     Waiting for application startup. <br/>
+> INFO:     Application startup complete. <br/>
+> ERROR:    [Errno 13] error while attempting to bind on address ('0.0.0.0', 80): permission denied <br/>
+> INFO:     Waiting for application shutdown. <br/>
+> INFO:     Application shutdown complete.
+
 ### API Documentation at: `http://127.0.0.1:8000/docs`
 ### Next.js home page: `http://127.0.0.1:3000`
 
@@ -14,11 +23,11 @@ Made with **FastAPI v0.115.12** and **Next.js v15.3.2**, with **Tiptap v2.12.0**
 
 | Email | Password |
 |:-------:|----------|
-|john.doe@example.net| aBcD78%JoHn@|
-|jason.duval@lol.idk|12345!AbCdE#hUH|
-|carl.johnson@lol.idk|12345!cJinAnDrEaS#|
-|sweet.johnson@lol.idk|12345!SJinAnDrEaS#|
-|catalina@lol.idk|kata12345!SJinAnDrEaS#|
+| john.doe@example.net | aBcD78%JoHn@ |
+| jason.duval@lol.idk | 12345!AbCdE#hUH |
+| carl.johnson@lol.idk | 12345!cJinAnDrEaS# |
+| sweet.johnson@lol.idk | 12345!SJinAnDrEaS# |
+| catalina@lol.idk | kata12345!SJinAnDrEaS# |
 
 ## Containerization
 ### FastAPI
