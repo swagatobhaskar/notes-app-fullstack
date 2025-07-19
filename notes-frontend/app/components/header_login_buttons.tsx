@@ -17,8 +17,14 @@ export default function HeaderLoginButtons({email}: {email: string | null }) {
     };
 
     const handleLogout = async () => {
-        console.log("LOGOUT CLICKED!")
-        await apiPost(`${process.env.NEXT_PUBLIC_API_URL}/auth/logout`, {})  // /logout don't need body.
+        try {
+            await apiPost(`${process.env.NEXT_PUBLIC_API_URL}/auth/logout`, {})  // /logout don't need body.
+        } catch(err: unknown) {
+            console.error("LOGOUT Error: ", err)
+        }
+        
+        // Delete client-side cookie (non-HttpOnly)
+        document.cookie = "csrf_token=; Max-Age=0; path=/;"
         setIsDropdownOpen(false);
         router.push('/')
     }
