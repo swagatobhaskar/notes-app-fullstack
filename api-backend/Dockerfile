@@ -1,0 +1,25 @@
+FROM python:3.12-slim
+
+# Set environment variables to prevent python from writing pyc files
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+WORKDIR /src
+
+# copy the requirements first
+# As this file doesn't change often, Docker will detect it and
+# use the cache for this step, enabling the cache for the next step too.
+COPY ./requirements.txt /src/requirements.txt
+
+# RUN pip install --no-cache-dir --upgrade -r /src/requirements.txt
+RUN pip install --no-cache-dir -r /src/requirements.txt
+
+# Copy the application code to the working directory
+COPY . .
+
+# EXPOSE 80
+
+CMD ["fastapi", "run", "app/main.py", "--port", "80"]
+
+# Run app.py when the container launches
+# CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]

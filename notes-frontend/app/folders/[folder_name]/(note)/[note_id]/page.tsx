@@ -5,6 +5,7 @@ import React, { useState, useEffect } from "react"
 
 import NoteRemoveModal from "@/app/components/note_remove_modal";
 import { apiDelete, apiGet } from "@/app/lib/apiFetchHandler";
+import { getErrorMessage } from "@/app/lib/errors";
 
 interface Note {
     id: number,
@@ -29,9 +30,9 @@ export default function SelectedNotePage() {
             try {
                 const res = await apiGet<Note>(`${process.env.NEXT_PUBLIC_API_URL}/note/${Number(note_id)}`)
                 setNote(res)
-            } catch(err: any) {
+            } catch(err: unknown) {
                 console.error(err)
-                setError(err.message)
+                setError(getErrorMessage(err))
             } finally {
                 setLoading(false);
             }
@@ -40,19 +41,20 @@ export default function SelectedNotePage() {
         fetchNote();
     }, [note_id]);
 
-    const handleRemoveNote = async (e: React.MouseEvent) => {
+    const handleRemoveNote = async () => {
         try {
             await apiDelete(`${process.env.NEXT_PUBLIC_API_URL}/note/${note_id}`)
             setShowRemoveModal(false);  // Close modal on success
             router.back()
-        } catch(err: any) {
+        } catch(err: unknown) {
             console.error(err)
-            setError(err.message)
+            setError(getErrorMessage(err))
         }
     };
 
     if (loading) return <p>Loading...</p>;
     if (!note) return <p>Note not found.</p>;
+    if (error) return <p>{error}</p>
 
   return (
     <div className="m-auto lg:w-3/6 flex flex-col h-full">
@@ -67,7 +69,7 @@ export default function SelectedNotePage() {
         </div>
         <div className="flex flex-row space-x-2 float-right mt-4">
             <button
-                onClick={(e: React.MouseEvent) => router.push(`/folders/${folder_name}/${note_id}/edit`)}
+                onClick={() => router.push(`/folders/${folder_name}/${note_id}/edit`)}
                 className="text-white font-semibold px-3 py-1 rounded-sm bg-blue-400
                 hover:bg-blue-500 cursor-pointer"
             >

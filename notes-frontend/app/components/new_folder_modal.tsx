@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { apiPost } from "../lib/apiFetchHandler"
+import { getErrorMessage } from "../lib/errors";
 
 interface Folder {
     id: number,
@@ -17,8 +18,8 @@ export default function NewFolderModal(
         onCreated: (newFolder: Folder) => void;
     }) {
     const inputRef = useRef<HTMLInputElement>(null)
-    const [ newFolderName, setNewFolderName ] = useState<string>()
-    const [ error, setError ] = useState<string|null>()
+    const [ newFolderName, setNewFolderName ] = useState<string>('')
+    const [ error, setError ] = useState<string|null>(null)
 
     useEffect(() => {
         inputRef.current?.focus()
@@ -43,7 +44,7 @@ export default function NewFolderModal(
             return
         }
         try {
-            const createdFolder = await apiPost(
+            const createdFolder = await apiPost<Folder>(
                 `${process.env.NEXT_PUBLIC_API_URL}/folder`,
                 {name: newFolderName}
             )
@@ -56,10 +57,10 @@ export default function NewFolderModal(
             //     console.error(text)
             //     throw new Error('Failed to create folder!')
             // }
-        } catch (err: any) {
-            setError(err?.message ?? 'Something went wrong')
+        } catch (err: unknown) {
+            setError(getErrorMessage(err))
             console.error(err)
-            throw new Error('Failed to create folder!')
+            // throw new Error('Failed to create folder!')
         }
     }
 
@@ -84,7 +85,7 @@ export default function NewFolderModal(
                         className="outline outline-slate-600 p-2 rounded-md focus:shadow-md text-lg"
                     />
                 </div>
-                {/* { error && (<p className="text-sm text-red-500">{error}</p>) } */}
+                { error && (<p className="text-sm text-red-500">{error}</p>) }
                 <div className="flex flex-row justify-center items-center space-x-4">
                     <button
                         onClick={onClose}

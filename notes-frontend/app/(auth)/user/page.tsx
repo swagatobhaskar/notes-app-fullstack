@@ -3,7 +3,7 @@
 import { apiGet } from "@/app/lib/apiFetchHandler";
 import { useState, useEffect } from "react";
 
-interface UserProfile {
+interface User {
   id: number;
   email: string;
   fname: string;
@@ -12,18 +12,16 @@ interface UserProfile {
 
 export default function ProfilePage() {
 
-    const [ profile, setProfile ] = useState<UserProfile | null>(null);
+    const [ profile, setProfile ] = useState<User | null>(null);
     const [ error, setError ] = useState<Error|null>(null)
     const [ loading, setLoading ] = useState<boolean>(false);
 
     useEffect(() => {
         async function fetchData() {
         try {
-            const res = await apiGet(`${process.env.NEXT_PUBLIC_API_URL}/user`)
-            // console.log(res)
-            const result = await res//.json();
+            const result = await apiGet<User>(`${process.env.NEXT_PUBLIC_API_URL}/user`)
+            // console.log(result)
             setProfile(result);
-            // console.log(result);
         } catch (error: unknown) {
             // Type the error as an Error or handle it if it's something else
             if (error instanceof Error) {

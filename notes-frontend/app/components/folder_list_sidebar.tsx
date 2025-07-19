@@ -1,10 +1,11 @@
 "use client"
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 import { apiGet } from "../lib/apiFetchHandler";
 import FolderItem from "./folder_item";
-import Link from "next/link";
+import { getErrorMessage } from "../lib/errors";
 
 interface Folder {
     id: number,
@@ -20,11 +21,12 @@ export default function FolderListSidebar({current_folder_name}: {current_folder
     useEffect(() => {
         const fetchAllFoldersFromAPI = async () => {
             try {
+                setError(null)
                 const notes = await apiGet<Folder[]>(`${process.env.NEXT_PUBLIC_API_URL}/folder`)
                 setFolders(notes)
-            } catch (err: any) {
+            } catch (err: unknown) {
                 console.error(err)
-                setError(err.message)
+                setError(getErrorMessage(err))
             } finally {
                 setLoading(false)
             }
@@ -34,6 +36,10 @@ export default function FolderListSidebar({current_folder_name}: {current_folder
 
     if (loading) {
         return <p>Loading...</p>
+    }
+
+    if (error) {
+        return <p>{error}</p>
     }
 
     return (

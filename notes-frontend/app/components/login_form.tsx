@@ -89,7 +89,7 @@ export default function LoginFormComponent() {
                 </button>
             </form>
                 {error && <p className="text-sm text-red-600 text-center">{error}</p>}
-                <p className="text-sm text-center text-gray-600">Don't have account?
+                <p className="text-sm text-center text-gray-600">Don&apos;t have account?
                     <Link href="/register" className="text-blue-500 hover:text-blue-600 ml-1 font-bold">Register Now</Link>
                 </p>
         </div>
