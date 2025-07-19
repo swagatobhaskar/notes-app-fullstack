@@ -53,7 +53,7 @@ COPY --from=builder /src/.next/static ./.next/static
 EXPOSE 3000
 
 # Step 8: Start the app using the standalone server
-CMD ["node", "server.js"]
+CMD ["node", "server.js", "--hostname", "0.0.0.0"]
 
 # Define the default command to be executed when the container is started with pnpm start.
 # CMD [ "npm", "start" ]
