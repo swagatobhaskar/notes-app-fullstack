@@ -8,10 +8,12 @@ import Footer from "./components/footer";
 
 export default async function Home() {
 
-  try {
-    const cookieStore = cookies()
-    const csrfToken = (await cookieStore).get('csrf_token')?.value
+  let isAuthenticated = false;
 
+  const cookieStore = cookies()
+  const csrfToken = (await cookieStore).get('csrf_token')?.value
+
+  try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user`, {
       method: "GET",
       headers: {
@@ -21,14 +23,11 @@ export default async function Home() {
       credentials: 'include',
       cache: 'no-store'
     })
-
-    if (!res.ok) throw new Error("Error connecting to server!")
-
     if (res.ok) {
-      redirect('/folders')
+      isAuthenticated = true;
     }
-  } catch(err: unknown) {
-    console.error("Safe fetch failed:", err);
+  } catch (err: unknown) {
+    console.error("Fetch error:", err);
     return (
       <div className="flex items-center justify-center flex-1">
         <div className="flex flex-col items-center text-center text-2xl">
@@ -39,12 +38,16 @@ export default async function Home() {
           <p className="text-base">Sorry, we could not load the items at this time.</p>
         </div>
       </div>
-    );
+    )
   }
   
-
+  if (isAuthenticated) {
+    console.info("Redirecting to /folders from /")
+    redirect('/folders')
+  }
+ 
   return (
-    <div className="relative flex flex-col min-h-screen">
+    <div id="home" className="relative flex flex-col min-h-screen">
       <Image 
         src='/hugo-rocha-unsplash.jpg'
         alt="brainstorm-notes"
