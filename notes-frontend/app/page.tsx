@@ -7,11 +7,6 @@ import Header from "./components/header";
 import Footer from "./components/footer";
 
 export default async function Home() {
-  let isOffline = false;
-  // Use AbortController for timeout
-  // To avoid the page hanging indefinitely if the backend is stuck:
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 5000)  // 5 second timeout
 
   try {
     const cookieStore = cookies()
@@ -19,7 +14,6 @@ export default async function Home() {
 
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user`, {
       method: "GET",
-      signal: controller.signal,
       headers: {
         Cookie: (await cookieStore).toString(),
         ...( csrfToken ? {'X-CSRF-Token': csrfToken} : {})
@@ -28,22 +22,24 @@ export default async function Home() {
       cache: 'no-store'
     })
 
-    clearTimeout(timeout); // cleanup timeout once fetch completes
+    if (!res.ok) throw new Error("Error connecting to server!")
 
     if (res.ok) {
       redirect('/folders')
     }
-  // if res is 401 or something else, fall through to render
   } catch(err: unknown) {
-    clearTimeout(timeout);
-    isOffline = true;
-    
-    if (err instanceof Error && err.name === "AbortError") {
-      console.warn("Request timed out.");
-    } else {
-      console.error("Failed to fetch user info:", err);
-    }
-    // Fall through to render the landing page
+    console.error("Safe fetch failed:", err);
+    return (
+      <div className="flex items-center justify-center flex-1">
+        <div className="flex flex-col items-center text-center text-2xl">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-14">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+          </svg>
+          <h2>Items Unavailable</h2>
+          <p className="text-base">Sorry, we could not load the items at this time.</p>
+        </div>
+      </div>
+    );
   }
   
 
@@ -66,11 +62,7 @@ export default async function Home() {
       <Header />
       
       <main className="flex-1 z-10 p-6 text-black">
-        {isOffline && (
-          <div className="mb-4 px-4 py-2 rounded-md bg-red-600 text-white font-semibold text-center shadow-md">
-            ⚠️ Unable to connect to the server. Some features may not work.
-          </div>
-        )}
+        
         <div className="mx-auto max-w-3xl bg-slate-300/45 shadow-md rounded-md h-96 flex flex-col items-center justify-center gap-y-4">
           {/* Your main content here */}
           <h1 className="text-4xl font-extrabold">Your Online Notes Archive</h1>
