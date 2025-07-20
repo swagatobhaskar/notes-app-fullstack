@@ -4,8 +4,8 @@ export default function NoteSectionLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <>
+        <div>
         {children}
-        </>
+        </div>
     )
 }

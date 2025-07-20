@@ -13,29 +13,6 @@ export default function RegistrationFormComponent() {
     
     const router = useRouter()
 
-    // It's handled in the parent Server component
-    // Check if the user is already logged in
-    // useEffect(() => {
-    //     const checkLoginStatus = async () => {
-    //         try {
-    //             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user`, {
-    //                 method: 'GET',
-    //                 credentials: 'include', // Include cookies if necessary
-    //             });
-
-    //             if (response.ok) {
-    //                 // If the user is logged in, redirect them to `/folders`
-    //                 router.push("/folders");
-    //             }
-    //         } catch (err) {
-    //             // Handle the error (if the API call fails)
-    //             console.error('Error checking login status', err);
-    //         }
-    //     };
-
-    //     checkLoginStatus();
-    // }, [router]); // router = useRouter()
-
     useEffect(() => {
         if (password && retypePassword) {
             if (password === retypePassword) {

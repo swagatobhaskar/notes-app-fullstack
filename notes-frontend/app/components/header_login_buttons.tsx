@@ -10,7 +10,7 @@ export default function HeaderLoginButtons({email}: {email: string | null }) {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const isLoggedIn: boolean = !!email;
     const dropdownRef = useRef<HTMLDivElement>(null)
-  
+    
     // Toggle the dropdown visibility
     const toggleDropdown = () => {
         setIsDropdownOpen((prev) => !prev);
@@ -63,7 +63,7 @@ export default function HeaderLoginButtons({email}: {email: string | null }) {
                         >
                             Log Out
                         </p>
-                        <Link href={'/user'} className="text-black/70 text-sm py-2">{email}</Link>
+                        <Link href={'/user'} className="text-black/70 text-sm py-2 hover:text-blue-400">{email}</Link>
                     </div>
                 )}
             </div>
