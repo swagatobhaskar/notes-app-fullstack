@@ -29,4 +29,4 @@ COPY . .
 # CMD ["fastapi", "run", "app/main.py", "--port", "80"]  # Don't run this CLI mode, use uvicorn or such ASGI/WSGI
 
 # Run app.py when the container launches
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
