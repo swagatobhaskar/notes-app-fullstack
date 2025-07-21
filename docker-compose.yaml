@@ -12,8 +12,8 @@ services:
       - "3000:3000"
     depends_on:
       - api_backend
-    environment:
-      - NEXT_PUBLIC_API_URL=http://api_backend:8000/api
+    # environment:
+    #   - NEXT_PUBLIC_API_URL=http://api_backend:8000/api
     # networks:
     #   - notes-network
 
