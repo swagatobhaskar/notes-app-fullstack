@@ -36,3 +36,17 @@ Shut down and remove containers with: `docker compose down --volumes --remove-or
 - Open `http://0.0.0.0:80/` on the browser
 
 Setup docker compose with nginx to avoid port issues between backend and frontend.
+
+
+### Home Page
+![Hom page](<Screenshot from 2026-06-07 12-28-47.png>)
+
+### Folders List
+![Folders list](<Screenshot from 2026-06-07 12-31-48.png>)
+
+## Folder detail
+![Folder Detail](<Screenshot from 2026-06-07 12-31-59.png>)
+
+### TipTap Rich Text Editor
+![TipTap Rich Text Editor](<Screenshot from 2026-06-07 12-34-03.png>)
+
